@@ -1,0 +1,20 @@
+{:deps true
+ :builds {:client {:target :browser
+                   :asset-path "/js"
+                   :modules {:app {:init-fn shut-the-box.client.core/init!}}
+                   :devtools {:watch-dir "resources/public"
+                              :after-load shut-the-box.client.core/mount-root}
+                   :dev {:output-dir "target/dev/public/js"}
+                   :release {:output-dir "target/release/public/js"
+                             :closure-defines {"goog.DEBUG" false}}}
+          :server {:target :node-script
+                   :main shut-the-box.server.core/-main
+                   ;; Must set optimizations to simple, otherwise Shadow
+                   ;; CLJS will use advanced, which fails spectacularly
+                   ;; on Node.js.
+                   :compiler-options {:optimizations :simple}
+                   ;; autoload must be true for Node.js, otherwise
+                   ;; Shadow CLJS will not auto-reload files!
+                   :devtools {:autoload true}
+                   :dev {:output-to "target/dev/server.js"}
+                   :release {:output-to "target/release/server.js"}}}}
