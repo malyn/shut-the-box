@@ -1,10 +1,12 @@
 (ns shut-the-box.client.core
-  (:require [reagent.dom :as reagent]
-            [re-frame.core :as re-frame]
-            [taoensso.timbre :as log]
-            [shut-the-box.client.events]
-            [shut-the-box.client.subs]
-            [shut-the-box.client.views :as views]))
+  (:require
+    [mount.core :as mount]
+    [reagent.dom :as reagent]
+    [re-frame.core :as re-frame]
+    [taoensso.timbre :as log]
+    [shut-the-box.client.events]
+    [shut-the-box.client.subs]
+    [shut-the-box.client.views :as views]))
 
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
@@ -18,6 +20,7 @@
                      false))
 
 (defn init! []
+  (mount/start)
   (prevent-page-scrolling)
   (re-frame/dispatch-sync [:initialize-db])
   (mount-root))

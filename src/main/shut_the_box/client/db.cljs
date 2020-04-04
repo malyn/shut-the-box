@@ -6,4 +6,5 @@
   (s/keys :req-un []))
 
 (def default-db
-  {})
+  {:state :unjoined
+   :peers #{}})

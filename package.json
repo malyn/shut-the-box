@@ -19,6 +19,7 @@
     "xregexp": "^4.2.4"
   },
   "devDependencies": {
+    "agora-rtc-sdk": "^3.0.2",
     "del": "^4.1.1",
     "gulp": "^4.0.2",
     "gulp-cli": "^2.2.0",

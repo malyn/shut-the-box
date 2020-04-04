@@ -9,6 +9,16 @@
 ;; (there is no filtering, in other words).  Layer 2 subscriptions must
 ;; therefore be very lightweight and should only be extractors.
 
+(reg-sub
+  ::state
+  (fn [{:keys [state]}]
+    state))
+
+(reg-sub
+  ::peers
+  (fn [{:keys [peers]}]
+    peers))
+
 
 ;; =====================================================================
 ;; LAYER 3 Subscriptions
