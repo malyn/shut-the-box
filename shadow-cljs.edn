@@ -1,4 +1,8 @@
 {:deps true
+ ;; We have to use SSL for the Shadow CLJS server because otherwise web
+ ;; browsers will complain if an HTTPS page (which is required in order
+ ;; to access the microphone and camera) makes a connection to a non-SSL
+ ;; WebSocket address.
  :ssl {:keystore "keystore.jks"
        :password "password"}
  :builds {:client {:target :browser
@@ -17,6 +21,11 @@
                    :compiler-options {:optimizations :simple}
                    ;; autoload must be true for Node.js, otherwise
                    ;; Shadow CLJS will not auto-reload files!
-                   :devtools {:autoload true}
+                   ;; You have to specify the devtools-url, otherwise
+                   ;; Shadow CLJS's (Node.js) REPL will try to connect
+                   ;; to "localhost" which then fails because the domain
+                   ;; name doesn't match what is in the SSL certificate.
+                   :devtools {:autoload true
+                              :devtools-url "https://devbox.example.com:9630"}
                    :dev {:output-to "target/dev/server.js"}
                    :release {:output-to "target/release/server.js"}}}}
