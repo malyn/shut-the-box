@@ -2,7 +2,7 @@
   (:require
     [macchiato.middleware.node-middleware :refer [wrap-node-middleware]]
     [macchiato.middleware.ssl :refer [wrap-forwarded-scheme wrap-ssl-redirect]]
-    [macchiato.server :as http]
+    [macchiato.server :as macchiato]
     [macchiato.util.response :as response]
     [mount.core :as mount :refer [defstate]]
     [reitit.ring :as ring]
@@ -39,10 +39,12 @@
                     wrap-ssl-redirect]})))
 
 (defstate server
-  :start (http/start
+  :start (macchiato/https-server
            {:handler    (handler)
             :host       (:host @env)
             :port       (:port @env)
+            :private-key "dev-privkey.pem"
+            :certificate "dev-fullchain.pem"
             :on-success #(log/info "ShutTheBox started on" (:host @env) ":" (:port @env))})
   :stop (.close @server))
 

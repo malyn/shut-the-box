@@ -49,15 +49,50 @@
            :channel channel
            :peers #{})))
 
-(reg-event-db
+(reg-event-fx
+  ::publish-video
+  (fn [{:keys [db]} [_ {:keys [on-success on-failure]}]]
+    (agora/create-stream!
+      @rtc/client
+      "video-me"
+      (:uid db)
+      true
+      true
+      (fn []
+        (re-frame/dispatch [on-success]))
+      (fn []
+        (re-frame/dispatch [on-failure])))))
+
+(reg-event-fx
+  ::subscribe-stream
+  (fn [_ [_ {:keys [uid stream on-failure]}]]
+    (agora/subscribe-stream!
+      @rtc/client
+      stream
+      (fn []
+        (re-frame/dispatch [on-failure uid])))))
+
+(reg-event-fx
   ::join-succeeded
-  (fn [db [_ channel uid]]
+  (fn [{:keys [db]} [_ channel uid]]
     (log/info "Join succeeded for channel" channel "; uid=" uid)
-    (assoc db
-           :state :joined
-           :channel channel
-           :uid uid
-           :peers #{})))
+    {:db (assoc db
+                :state :joined
+                :channel channel
+                :uid uid
+                :peers #{})
+     :dispatch [::publish-video {:on-success ::publish-succeeded
+                                 :on-failure ::publish-failed}]}))
+
+(reg-event-db
+  ::publish-succeeded
+  (fn [db [_]]
+    db))
+
+(reg-event-db
+  ::publish-failed
+  (fn [db [_]]
+    db))
 
 (reg-event-db
   ::join-failed
@@ -78,3 +113,22 @@
   (fn [{:keys [peers] :as db} [_ uid]]
     (assoc db
            :peers (disj peers uid))))
+
+(reg-event-fx
+  ::stream-added
+  (fn [{:keys [db]} [_ uid stream]]
+    (log/info "Stream added for uid" uid)
+    (when (not= (:uid db) uid)
+      {:dispatch [::subscribe-stream {:uid uid
+                                      :stream stream
+                                      :on-failure ::subscribe-failed}]})))
+
+(reg-event-fx
+  ::stream-subscribed
+  (fn [{:keys [db]} [_ uid stream]]
+    (log/info "Stream subscribed for uid" uid)
+    (agora/play-stream!
+      stream
+      (str "video-" uid))
+    ;; TODO Mark the player's stream as playing.
+    {:db db}))

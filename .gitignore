@@ -2,4 +2,7 @@
 /.shadow-cljs
 /node_modules
 /target
+*.jks
+*.pkcs12
+*.pem
 config.edn

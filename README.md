@@ -1,3 +1,12 @@
+# Convert Let's Encrypt Keys to JKS
+
+From [here](https://maximilian-boehm.com/en-gb/blog/create-a-java-keystore-jks-from-lets-encrypt-certificates-1884000/):
+
+```
+openssl pkcs12 -export -in dev-fullchain.pem -inkey dev-privkey.pem -out dev.pkcs12
+keytool -importkeystore -deststorepass password -destkeypass password -destkeystore keystore.jks -srckeystore dev.pkcs12 -srcstoretype PKCS12 -srcstorepass password
+```
+
 # Shadow CLJS
 
 Compile and watch the client and server builds:

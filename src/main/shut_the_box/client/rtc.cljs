@@ -29,3 +29,25 @@
            (.on @client "peer-leave" handler)
            handler)
   :stop (.off @client "peer-leave" @on-peer-leave))
+
+(defstate on-stream-added
+  :start (let [handler (fn [evt]
+                         (let [stream (.-stream evt)
+                               uid (.getId stream)]
+                           (log/info "Stream added for" uid)
+                           (dispatch [:shut-the-box.client.events/stream-added
+                                      uid stream])))]
+           (.on @client "stream-added" handler)
+           handler)
+  :stop (.off @client "stream-added" @on-stream-added))
+
+(defstate on-stream-subscribed
+  :start (let [handler (fn [evt]
+                         (let [stream (.-stream evt)
+                               uid (.getId stream)]
+                           (log/info "Stream subscribed for" uid)
+                           (dispatch [:shut-the-box.client.events/stream-subscribed
+                                      uid stream])))]
+           (.on @client "stream-subscribed" handler)
+           handler)
+  :stop (.off @client "stream-subscribed" @on-stream-subscribed))

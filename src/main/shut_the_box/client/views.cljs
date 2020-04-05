@@ -23,14 +23,20 @@
 
 (defn player-tile [uid]
   [:div.player
+   [:div
+    {:id (str "video-" uid)
+     :style {:width "256px"
+             :height "256px"}}]
    (str "Player #" uid)])
 
 (defn playing-view []
   [:div
    [:h1 "Play Shut the Box"]
-   [:div.player1
-    [:div#player1_video]
-    "Player 1"]
+   [:div.player-me
+    [:div#video-me
+     {:style {:width "256px"
+              :height "256px"}}]
+    "Me"]
    (map player-tile @(subscribe [::subs/peers]))])
 
 (defn main-panel []

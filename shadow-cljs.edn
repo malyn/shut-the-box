@@ -1,4 +1,6 @@
 {:deps true
+ :ssl {:keystore "keystore.jks"
+       :password "password"}
  :builds {:client {:target :browser
                    :asset-path "/js"
                    :modules {:app {:init-fn shut-the-box.client.core/init!}}
