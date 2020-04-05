@@ -31,6 +31,7 @@
                                             :audio audio?
                                             :video video?
                                             :screen false})]
+    (.setVideoProfile stream "120p_3")
     (.init stream
            (fn []
              (log/info "Local stream initialized")
