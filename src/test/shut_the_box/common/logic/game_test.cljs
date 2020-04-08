@@ -15,32 +15,32 @@
 
 (deftest add-player-test
   ;; Players can be added immediately after the game is created.
-  (let [[result g] (-> (game/new)
-                       (game/add-player player1-id))]
-    (is (= :ok result))
+  (let [g (-> (game/new)
+              (game/add-player player1-id))]
     (is (= 1 (-> g :players keys count)))
     (is (= :waiting (-> g :players (get player1-id) :state)))
     (is (= tile/num-tiles (-> g :players (get player1-id) :tiles count))))
 
   ;; Cannot add the same player twice.
   (let [g (-> (game/new)
-              (game/add-player player1-id) second)]
-    (is (= [:err] (game/add-player g player1-id))))
+              (game/add-player player1-id))]
+    (is (nil? (game/add-player g player1-id))))
 
   ;; Players *cannot* be added after a round has started.
   (let [g (-> (game/new)
-              (game/add-player player1-id) second
-              game/start-round second)]
-    (is (= [:err] (game/add-player g player2-id)))))
+              (game/add-player player1-id)
+              game/start-round)]
+    (is (nil? (game/add-player g player2-id)))))
 
 (deftest start-round-test
   ;; The round can start as soon as one player has been added.
-  (let [[result g] (-> (game/new)
-                       (game/add-player player1-id) second
-                       game/start-round)]
-    (is (= :ok result))
+  (let [g (-> (game/new)
+              (game/add-player player1-id)
+              (game/start-round))]
     (is (= :playing (-> g :state))))
 
   ;; Consequently, at least one player must be in the game in order for
   ;; a round to start.
-  (is (= [:err] (-> (game/new) game/start-round))))
+  (is (nil? (-> (game/new)
+                ;; Notice that there is no add-player
+                (game/start-round)))))

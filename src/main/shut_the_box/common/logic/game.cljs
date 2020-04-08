@@ -11,17 +11,15 @@
 
 (defn add-player
   [game player-id]
-  (if (and (= (:state game) :waiting)
-           (not (contains? (:players game) player-id)))
-    [:ok (assoc-in game
-                   [:players player-id]
-                   {:state :waiting
-                    :tiles (tile/reset)})]
-    [:err]))
+  (when (and (= (:state game) :waiting)
+             (not (contains? (:players game) player-id)))
+    (assoc-in game
+              [:players player-id]
+              {:state :waiting
+               :tiles (tile/reset)})))
 
 (defn start-round
   [game]
-  (if (and (= (:state game) :waiting)
-           (not (zero? (count (:players game)))))
-    [:ok (assoc game :state :playing)]
-    [:err]))
+  (when (and (= (:state game) :waiting)
+             (not (zero? (count (:players game)))))
+    (assoc game :state :playing)))

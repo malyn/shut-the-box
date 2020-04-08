@@ -17,9 +17,8 @@
 
 (defn shut
   [tiles n]
-  (if (can-shut? tiles n)
-    [:ok (assoc tiles (dec n) false)]
-    [:err]))
+  (when (can-shut? tiles n)
+    (assoc tiles (dec n) false)))
 
 (defn shut-the-box?
   [tiles]

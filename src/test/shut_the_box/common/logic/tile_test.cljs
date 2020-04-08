@@ -28,27 +28,24 @@
 (deftest shut-test
   (let [tiles (tile-bits #{1 3 4 5 6 8 9 10})]
     ;; Can shut "up" tiles.
-    (is (= [:ok (tile-bits #{3 4 5 6 8 9 10})] (tile/shut tiles 1)))
-    (is (= [:ok (tile-bits #{1 3 4 5 6 8 9})] (tile/shut tiles 10)))
+    (is (= (tile-bits #{3 4 5 6 8 9 10}) (tile/shut tiles 1)))
+    (is (= (tile-bits #{1 3 4 5 6 8 9}) (tile/shut tiles 10)))
     ;; Can't shut "down" tiles.
-    (is (= [:err] (tile/shut tiles 2)))
-    (is (= [:err] (tile/shut tiles 7)))
+    (is (nil? (tile/shut tiles 2)))
+    (is (nil? (tile/shut tiles 7)))
     ;; Can't shut invalid tiles.
-    (is (= [:err] (tile/shut tiles 0)))
-    (is (= [:err] (tile/shut tiles 11)))))
+    (is (nil? (tile/shut tiles 0)))
+    (is (nil? (tile/shut tiles 11)))))
 
 (deftest shut-the-box?-test
   (is (false? (tile/shut-the-box? (tile-bits #{1}))))
   (is (true? (tile/shut-the-box? (tile-bits #{}))))
   (is (false? (-> (tile-bits #{2 7})
                   (tile/shut 2)
-                  second
                   tile/shut-the-box?)))
   (is (true? (-> (tile-bits #{2 7})
                  (tile/shut 2)
-                 second
                  (tile/shut 7)
-                 second
                  tile/shut-the-box?))))
 
 (deftest valid-combination?-test
