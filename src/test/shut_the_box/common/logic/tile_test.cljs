@@ -35,7 +35,11 @@
     (is (nil? (tile/shut tiles 7)))
     ;; Can't shut invalid tiles.
     (is (nil? (tile/shut tiles 0)))
-    (is (nil? (tile/shut tiles 11)))))
+    (is (nil? (tile/shut tiles 11)))
+    ;; Can (try to) shut multiple tiles at once.
+    (is (= (tile-bits #{3 4 5 6 8 9}) (tile/shut tiles [1 10])))
+    (is (= (tile-bits #{3 5 8 9 10}) (tile/shut tiles [1 4 6])))
+    (is (nil? (tile/shut tiles [1 2])))))
 
 (deftest shut-the-box?-test
   (is (false? (tile/shut-the-box? (tile-bits #{1}))))

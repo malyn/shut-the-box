@@ -15,16 +15,18 @@
   (and (is-valid? n)
        (nth tiles (dec n))))
 
-(defn shut
-  [tiles n]
-  (when (can-shut? tiles n)
-    (assoc tiles (dec n) false)))
-
-(defn shut-the-box?
-  [tiles]
-  (every? false? tiles))
-
 (defn valid-combination?
   [tiles sum xs]
   (and (= sum (apply + xs))
        (every? #(can-shut? tiles %) xs)))
+
+(defn shut
+  [tiles x-or-xs]
+  (if (coll? x-or-xs)
+    (reduce shut tiles x-or-xs)
+    (when (can-shut? tiles x-or-xs)
+      (assoc tiles (dec x-or-xs) false))))
+
+(defn shut-the-box?
+  [tiles]
+  (every? false? tiles))

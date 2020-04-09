@@ -44,3 +44,62 @@
   (is (nil? (-> (game/new)
                 ;; Notice that there is no add-player
                 (game/start-round)))))
+
+(deftest set-active-player-test
+  ;; Any player can be made the active player at any time after the
+  ;; round has been started.
+  (let [g (-> (game/new)
+              (game/add-player player1-id)
+              (game/add-player player2-id)
+              (game/start-round))]
+    (let [g (game/set-active-player g player1-id)]
+      (is (= :rolling (-> g :players (get player1-id) :state)))
+      (is (= :waiting (-> g :players (get player2-id) :state)))
+      (let [g (game/set-active-player g player2-id)]
+        (is (= :waiting (-> g :players (get player1-id) :state)))
+        (is (= :rolling (-> g :players (get player2-id) :state))))))
+
+  ;; Only added players can be marked active.
+  (let [g (-> (game/new)
+              (game/add-player player1-id)
+              game/start-round)]
+    (is (nil? (game/set-active-player g player2-id)))))
+
+(deftest roll-dice-test
+  ;; The active player can roll the dice; inactive players *cannot* roll
+  ;; the dice.
+  (let [g (-> (game/new)
+              (game/add-player player1-id)
+              (game/add-player player2-id)
+              (game/start-round)
+              (game/set-active-player player1-id)
+              (game/roll-dice player1-id))]
+    (is (<= 2 (-> g :players (get player1-id) :last-roll) 12))
+    (is (nil? (game/roll-dice g player2-id))))
+
+  ;; The round must have been started for the dice to be rolled.
+  (let [g (-> (game/new)
+              (game/add-player player1-id)
+              (game/add-player player2-id))]
+    (is (nil? (game/roll-dice g player1-id)))))
+
+(deftest shut-tiles-test
+  (let [g (-> (game/new)
+              (game/add-player player1-id)
+              (game/add-player player2-id)
+              (game/start-round)
+              (game/set-active-player player1-id)
+              (assoc-in [:players player1-id :last-roll] 8)
+              (assoc-in [:players player1-id :tiles]
+                        (tile-bits #{2 3 4 5 6 8 9 10})))]
+    ;; Tiles that match the sum can be shut.
+    (let [g (game/shut-tiles g player1-id [2 6])]
+      (is (= (tile-bits #{3 4 5 8 9 10})
+             (-> g :players (get player1-id) :tiles))))
+    (let [g (game/shut-tiles g player1-id [8])]
+      (is (= (tile-bits #{2 3 4 5 6 9 10})
+             (-> g :players (get player1-id) :tiles))))
+    ;; Only tiles not already shut can be shut.
+    (is (nil? (game/shut-tiles g player1-id [1 2 4])))
+    ;; Inactive players *cannot* shut tiles.
+    (is (nil? (game/shut-tiles g player2-id [8])))))
