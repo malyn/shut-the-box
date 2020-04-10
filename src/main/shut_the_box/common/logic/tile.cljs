@@ -1,4 +1,6 @@
-(ns shut-the-box.common.logic.tile)
+(ns shut-the-box.common.logic.tile
+  (:require
+    [clojure.math.combinatorics :as combo]))
 
 (def num-tiles 10)
 
@@ -19,6 +21,19 @@
   [tiles sum xs]
   (and (= sum (apply + xs))
        (every? #(can-shut? tiles %) xs)))
+
+(defn valid-combinations
+  [tiles sum]
+  (let [tile-numbers (reduce
+                       (fn [xs n]
+                         (if (can-shut? tiles n)
+                           (conj xs n)
+                           xs))
+                       []
+                       (range 1 (inc num-tiles)))]
+    (filter
+      #(= sum (apply + %))
+      (mapcat #(combo/combinations tile-numbers %) (range 1 6)))))
 
 (defn shut
   [tiles x-or-xs]

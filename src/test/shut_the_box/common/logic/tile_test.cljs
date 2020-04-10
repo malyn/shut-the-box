@@ -64,3 +64,9 @@
     (is (false? (tile/valid-combination? tiles 6 [2 4])))
     ;; Combination is invalid if the tiles are invalid.
     (is (false? (tile/valid-combination? tiles 6 [-2 8])))))
+
+(deftest valid-combinations-test
+  (let [tiles (tile-bits #{1 3 4 5 6 8 9 10})]
+    (is (= #{[1 5] [6]} (set (tile/valid-combinations tiles 6))))
+    (is (= #{[3]} (set (tile/valid-combinations tiles 3))))
+    (is (= [] (tile/valid-combinations tiles 2)))))

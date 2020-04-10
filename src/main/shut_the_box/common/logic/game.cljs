@@ -30,11 +30,6 @@
   [game player-id]
   (contains? (:players game) player-id))
 
-(defn active-player?
-  [game player-id]
-  (and (valid-player? game player-id)
-       (-> game :players (get player-id) :state (= :rolling))))
-
 (defn start-round
   [game]
   (when (and (= (:state game) :waiting)
@@ -52,16 +47,32 @@
 (defn roll-dice
   [{:keys [state players] :as game} player-id]
   (when (and (= state :playing)
-             (active-player? game player-id))
-    (let [roll (apply + (repeatedly num-dice #(inc (rand-int 6))))]
-      (assoc-in game [:players player-id :last-roll] roll))))
+             (valid-player? game player-id)
+             (-> game :players (get player-id) :state (= :rolling)))
+    (let [roll (apply + (repeatedly num-dice #(inc (rand-int 6))))
+          game (assoc-in game [:players player-id :last-roll] roll)]
+      ;; Can the player satisfy this roll? If so, they are in the
+      ;; thinking state, if not, they are done.
+      (if (seq (tile/valid-combinations
+                 (-> game :players (get player-id) :tiles)
+                 roll))
+        (assoc-in game [:players player-id :state] :thinking)
+        (assoc-in game [:players player-id :state] :done)))))
 
 (defn shut-tiles
   [{:keys [state players] :as game} player-id tiles]
   (when (and (= state :playing)
-             (active-player? game player-id))
+             (valid-player? game player-id)
+             (-> game :players (get player-id) :state (= :thinking)))
     (let [player (get players player-id)]
       (when (tile/valid-combination? (:tiles player)
                                      (:last-roll player)
                                      tiles)
-        (update-in game [:players player-id :tiles] tile/shut tiles)))))
+        (let [game (update-in game [:players player-id :tiles] tile/shut tiles)]
+          (if (tile/shut-the-box? (-> game :players (get player-id) :tiles))
+            ;; Shut the box; the player's turn and the round are done.
+            (-> game
+                (assoc :state :done)
+                (assoc-in [:players player-id :state] :done))
+            ;; Box not shut; player is back to rolling.
+            (assoc-in game [:players player-id :state] :rolling)))))))
