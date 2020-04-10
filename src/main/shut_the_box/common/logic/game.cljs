@@ -40,9 +40,7 @@
   [game player-id]
   (when (and (= (:state game) :playing)
              (valid-player? game player-id))
-    (-> game
-        (update :players (fn [ps] (map-vals #(assoc % :state :waiting) ps)))
-        (assoc-in [:players player-id :state] :rolling))))
+    (assoc-in game [:players player-id :state] :rolling)))
 
 (defn roll-dice
   [{:keys [state players] :as game} player-id]

@@ -8,7 +8,8 @@
     [reitit.ring :as ring]
     ["serve-static" :as serve-static]
     [taoensso.timbre :as log]
-    [shut-the-box.server.config :refer [env]]))
+    [shut-the-box.server.config :refer [env]]
+    [shut-the-box.server.websocket :as websocket]))
 
 (defn wrap-connection-close
   [handler]
@@ -38,14 +39,15 @@
       {:middleware [wrap-forwarded-scheme
                     wrap-ssl-redirect]})))
 
-(defstate server
-  :start (macchiato/https-server
-           {:handler    (handler)
-            :host       (:host @env)
-            :port       (:port @env)
-            :private-key "dev-privkey.pem"
-            :certificate "dev-fullchain.pem"
-            :on-success #(log/info "ShutTheBox started on" (:host @env) ":" (:port @env))})
+(defstate ^{:on-reload :noop} server
+  :start (doto (macchiato/https-server
+                 {:handler    (handler)
+                  :host       (:host @env)
+                  :port       (:port @env)
+                  :private-key "dev-privkey.pem"
+                  :certificate "dev-fullchain.pem"
+                  :on-success #(log/info "ShutTheBox started on" (:host @env) ":" (:port @env))})
+               (macchiato/start-ws #(websocket/handler %)))
   :stop (.close @server))
 
 (defn -main [& args]
