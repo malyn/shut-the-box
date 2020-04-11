@@ -5,7 +5,8 @@
     [taoensso.timbre :as log]
     [shut-the-box.client.agora-rtc :as agora]
     [shut-the-box.client.db :as db]
-    [shut-the-box.client.rtc :as rtc]))
+    [shut-the-box.client.rtc :as rtc]
+    [shut-the-box.client.server :as server]))
 
 
 ;; -- Interceptors ------------------------------------------------------------
@@ -34,6 +35,19 @@
     db/default-db))
 
 (reg-event-db
+  ::set-player-id
+  (fn [db [_ player-id]]
+    (assoc db :player-id player-id)))
+
+(reg-event-db
+  ::update-game
+  (fn [db [_ game-id game]]
+    (assoc db
+           :state :joined
+           :game-id game-id
+           :game game)))
+
+(reg-event-db
   ::join-channel
   (fn [db [_ {:keys [channel uid on-success on-failure]}]]
     (agora/join-channel!
@@ -48,6 +62,14 @@
            :state :joining
            :channel channel
            :peers #{})))
+
+(reg-event-fx
+  ::new-game
+  (fn [{:keys [db]} [_]]
+    ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
+    (server/new-game!)
+    {:db (assoc db
+                :state :joining)}))
 
 (reg-event-fx
   ::publish-video

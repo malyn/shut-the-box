@@ -13,16 +13,94 @@ html, body, div, span, ul, li {
 
 html {
   color: white;
-  background: black;
+  background-color: #454343;
+  font-family: -apple-system, "HelveticaNeue-Light", "Helvetica Neue Light",
+               "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
 }
 
+/* This has to be specified for standalone mode (since we do not
+ * forcibly size the #app container in standalone mode). */
 #app {
-  font-family: Segoe UI, SegoeUI, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+  height: 100vh;
+  width: 100vw;
+}
+
+button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+
+  /* Disable the highlight that appears when a button is pressed. */
+  /* TODO Do we need this?
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+  */
+}
+
+/* "Create/Join" view */
+.join {
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+}
+
+.join .title {
+  /* Center our child in a 33% high block */
+  height: 33%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* Text size */
+  text-align: center;
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: #f0f0f0;
+}
+
+.join .buttons {
+  height: 33%;
+  display: flex;
+  flex-flow: column;
+}
+
+.join button {
+  height: 50%;
+  margin: 2rem;
+  font-size: 2rem;
+}
+
+.join button.new-game {
+  background-color: #83a14d;
+  color: #f0f0f0;
+  font-weight: bold;
+}
+
+.join button.join-game {
+  background-color: #5166a9;
+  color: #f0f0f0;
+  font-weight: bold;
+}
+
+.join .credits {
+  /* Put the child at the bottom of a 33% high block */
+  height: 33%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  color: #f0f0f0;
+
+  /* Text size */
+  text-align: center;
+  font-size: 0.75rem;
+  font-style: italic;
 }

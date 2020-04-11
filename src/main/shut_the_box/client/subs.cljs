@@ -15,9 +15,14 @@
     state))
 
 (reg-sub
-  ::peers
-  (fn [{:keys [peers]}]
-    peers))
+  ::game-id
+  (fn [{:keys [game-id]}]
+    game-id))
+
+(reg-sub
+  ::game
+  (fn [{:keys [game]}]
+    game))
 
 
 ;; =====================================================================
