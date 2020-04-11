@@ -153,18 +153,18 @@ button {
 .tile.up { height: 100%; }
 .tile.down { height: 16px; }
 
-.tile.avatar0  { background-color: #a16639; } /* bear */
-.tile.avatar1  { background-color: #ffcc00; } /* chick */
-.tile.avatar2  { background-color: #ffaaff; } /* cow */
-.tile.avatar3  { background-color: #9f9898; } /* dog */
-.tile.avatar4  { background-color: #d2d0d0; } /* elephant */
-.tile.avatar5  { background-color: #4178c2; } /* hippo */
-.tile.avatar6  { background-color: #f3dbc8; } /* horse */
-.tile.avatar7  { background-color: #528cdb; } /* narwhal */
-.tile.avatar8  { background-color: #d23007; } /* parrot */
-.tile.avatar9  { background-color: #365a66; } /* penguin */
-.tile.avatar10 { background-color: #ee9fee; } /* pig */
-.tile.avatar11 { background-color: #bdb6b6; } /* rhino */
+.avatar0  .tile { background-color: #a16639; } /* bear */
+.avatar1  .tile { background-color: #ffcc00; } /* chick */
+.avatar2  .tile { background-color: #ffaaff; } /* cow */
+.avatar3  .tile { background-color: #9f9898; } /* dog */
+.avatar4  .tile { background-color: #d2d0d0; } /* elephant */
+.avatar5  .tile { background-color: #4178c2; } /* hippo */
+.avatar6  .tile { background-color: #f3dbc8; } /* horse */
+.avatar7  .tile { background-color: #528cdb; } /* narwhal */
+.avatar8  .tile { background-color: #d23007; } /* parrot */
+.avatar9  .tile { background-color: #365a66; } /* penguin */
+.avatar10 .tile { background-color: #ee9fee; } /* pig */
+.avatar11 .tile { background-color: #bdb6b6; } /* rhino */
 
 .tile .number {
   text-align: center;
@@ -177,21 +177,21 @@ button {
   grid-column: 1/1;
   width: 100%;
   height: 100%;
+  background-size: contain;
 }
 
-.avatar { background-size: contain; }
-.avatar.avatar0  { background-image: url(/img/avatars/bear.png); }
-.avatar.avatar1  { background-image: url(/img/avatars/chick.png); }
-.avatar.avatar2  { background-image: url(/img/avatars/cow.png); }
-.avatar.avatar3  { background-image: url(/img/avatars/dog.png); }
-.avatar.avatar4  { background-image: url(/img/avatars/elephant.png); }
-.avatar.avatar5  { background-image: url(/img/avatars/hippo.png); }
-.avatar.avatar6  { background-image: url(/img/avatars/horse.png); }
-.avatar.avatar7  { background-image: url(/img/avatars/narwhal.png); }
-.avatar.avatar8  { background-image: url(/img/avatars/parrot.png); }
-.avatar.avatar9  { background-image: url(/img/avatars/penguin.png); }
-.avatar.avatar10 { background-image: url(/img/avatars/pig.png); }
-.avatar.avatar11 { background-image: url(/img/avatars/rhino.png); }
+.avatar0  .avatar { background-image: url(/img/avatars/bear.png); }
+.avatar1  .avatar { background-image: url(/img/avatars/chick.png); }
+.avatar2  .avatar { background-image: url(/img/avatars/cow.png); }
+.avatar3  .avatar { background-image: url(/img/avatars/dog.png); }
+.avatar4  .avatar { background-image: url(/img/avatars/elephant.png); }
+.avatar5  .avatar { background-image: url(/img/avatars/hippo.png); }
+.avatar6  .avatar { background-image: url(/img/avatars/horse.png); }
+.avatar7  .avatar { background-image: url(/img/avatars/narwhal.png); }
+.avatar8  .avatar { background-image: url(/img/avatars/parrot.png); }
+.avatar9  .avatar { background-image: url(/img/avatars/penguin.png); }
+.avatar10 .avatar { background-image: url(/img/avatars/pig.png); }
+.avatar11 .avatar { background-image: url(/img/avatars/rhino.png); }
 
 .dice {
   display: flex;

@@ -27,13 +27,12 @@
    [:h1 "Joining..."]])
 
 (defn player-icon
-  [player-index]
+  []
   #_[:div.video
      {:id (str "video-" id)
       :style {:width "120px"
               :height "120px"}}]
-  [:div.avatar
-   {:class (str "avatar" player-index)}])
+  [:div.avatar])
 
 (defn die
   [x]
@@ -55,26 +54,26 @@
    (map die xs)])
 
 (defn tile
-  [player-index n up?]
+  [n up?]
   (with-meta
     [:div.tile
-     {:class [(if up? "up" "down")
-              (str "avatar" player-index)]}
+     {:class [(if up? "up" "down")]}
      [:div.number
       (if up? n "")]]
-    {:key (str "player-" player-index "-tile-" n)}))
+    {:key (str "tile-" n)}))
 
 (defn tile-set
-  [player-index tiles]
+  [tiles]
   [:div.tiles
    (map-indexed (fn [tile-index up?]
-                  (tile player-index (inc tile-index) up?)) tiles)])
+                  (tile (inc tile-index) up?)) tiles)])
 
 (defn player-tile
   [player-index [id {:keys [state tiles last-roll]}]]
   (with-meta
     [:div.player
-     [player-icon player-index]
+     {:class (str "avatar" player-index)}
+     [player-icon]
      [:div.player-id
       (str "Player #" id)]
      [:div.player-state
@@ -84,7 +83,7 @@
         :thinking (dice last-roll)
         :done (dice last-roll)
         "")]
-     [tile-set player-index tiles]]
+     [tile-set tiles]]
     {:key (str "player-tile-" player-index)}))
 
 (defn playing-view
