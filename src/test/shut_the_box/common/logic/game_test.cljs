@@ -16,26 +16,27 @@
 (deftest add-player-test
   ;; Players can be added immediately after the game is created.
   (let [g (-> (game/new)
-              (game/add-player player1-id))]
+              (game/add-player player1-id "One"))]
     (is (= 1 (-> g :players keys count)))
     (is (= :waiting (-> g :players (get player1-id) :state)))
+    (is (= "One" (-> g :players (get player1-id) :name)))
     (is (= tile/num-tiles (-> g :players (get player1-id) :tiles count))))
 
   ;; Cannot add the same player twice.
   (let [g (-> (game/new)
-              (game/add-player player1-id))]
-    (is (nil? (game/add-player g player1-id))))
+              (game/add-player player1-id "One"))]
+    (is (nil? (game/add-player g player1-id "One"))))
 
   ;; Players *cannot* be added after a round has started.
   (let [g (-> (game/new)
-              (game/add-player player1-id)
+              (game/add-player player1-id "One")
               game/start-round)]
-    (is (nil? (game/add-player g player2-id)))))
+    (is (nil? (game/add-player g player2-id "Two")))))
 
 (deftest start-round-test
   ;; The round can start as soon as one player has been added.
   (let [g (-> (game/new)
-              (game/add-player player1-id)
+              (game/add-player player1-id "One")
               (game/start-round))]
     (is (= :playing (-> g :state))))
 
@@ -49,8 +50,8 @@
   ;; Any player can be made the active player at any time after the
   ;; round has been started.
   (let [g (-> (game/new)
-              (game/add-player player1-id)
-              (game/add-player player2-id)
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two")
               (game/start-round))]
     (let [g (game/set-active-player g player1-id)]
       (is (= :rolling (-> g :players (get player1-id) :state)))
@@ -66,15 +67,15 @@
 
   ;; Only added players can be marked active.
   (let [g (-> (game/new)
-              (game/add-player player1-id)
+              (game/add-player player1-id "One")
               game/start-round)]
     (is (nil? (game/set-active-player g player2-id)))))
 
 (deftest roll-dice-test
   ;; The active player can roll the dice.
   (let [g (-> (game/new)
-              (game/add-player player1-id)
-              (game/add-player player2-id)
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two")
               (game/start-round)
               (game/set-active-player player1-id)
               (game/roll-dice player1-id))]
@@ -98,8 +99,8 @@
   ;; when the player only has the number 1 tile up (since you can't roll
   ;; a 1 with two dice).
   (let [g (-> (game/new)
-              (game/add-player player1-id)
-              (game/add-player player2-id)
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two")
               (game/start-round)
               (game/set-active-player player1-id)
               (assoc-in [:players player1-id :tiles] (tile-bits #{1}))
@@ -127,14 +128,14 @@
 
   ;; The round must have been started for the dice to be rolled.
   (let [g (-> (game/new)
-              (game/add-player player1-id)
-              (game/add-player player2-id))]
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two"))]
     (is (nil? (game/roll-dice g player1-id)))))
 
 (deftest shut-tiles-test
   (let [g (-> (game/new)
-              (game/add-player player1-id)
-              (game/add-player player2-id)
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two")
               (game/start-round)
               (game/set-active-player player1-id)
               (update-in [:players player1-id]

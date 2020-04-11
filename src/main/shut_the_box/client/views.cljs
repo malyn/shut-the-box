@@ -3,7 +3,63 @@
     [re-frame.core :refer [dispatch subscribe]]
     [shut-the-box.client.events :as events]
     [shut-the-box.client.subs :as subs]
+    [shut-the-box.client.ui :refer [modal]]
     [taoensso.timbre :as log]))
+
+(defn new-game-modal
+  []
+  [modal
+   :title "New Game"
+   :child [[:div.enter-your-name
+            [:div "Your Name"]
+            [:input
+             {:type "text"
+              :auto-focus "autofocus"
+              :style {:font-size "2rem"
+                      :width "100%"}
+              :on-change #(dispatch [::events/update-player-name
+                                     (-> % .-target .-value)])}]]]
+   :buttons [{:class "cancel"
+              :style {:background-color "red"
+                      :border-radius "0 0 0 16px"}
+              :on-click #(dispatch [::events/cancel-new-game])
+              :label "Cancel"}
+             {:class "ok"
+              :style {:background-color "green"
+                      :border-radius "0 0 16px 0"}
+              :on-click #(dispatch [::events/start-new-game])
+              :label "Ok"}]])
+
+(defn join-game-modal
+  []
+  [modal
+   :title "Join Game"
+   :child [[:div.enter-your-name
+            [:div "Game Id"]
+            [:input
+             {:type "text"
+              :auto-focus "autofocus"
+              :style {:font-size "2rem"
+                      :width "100%"}
+              :on-change #(dispatch [::events/update-game-id
+                                     (-> % .-target .-value js/parseInt)])}]
+            [:div "Your Name"]
+            [:input
+             {:type "text"
+              :style {:font-size "2rem"
+                      :width "100%"}
+              :on-change #(dispatch [::events/update-player-name
+                                     (-> % .-target .-value)])}]]]
+   :buttons [{:class "cancel"
+              :style {:background-color "red"
+                      :border-radius "0 0 0 16px"}
+              :on-click #(dispatch [::events/cancel-join-game])
+              :label "Cancel"}
+             {:class "ok"
+              :style {:background-color "green"
+                      :border-radius "0 0 16px 0"}
+              :on-click #(dispatch [::events/start-join-game])
+              :label "Ok"}]])
 
 (defn join-view
   []
@@ -19,7 +75,11 @@
      "Join Game"]]
    [:div.credits
     [:div
-     "A friendly game by Michael Alyn Miller"]]])
+     "A friendly game by Michael Alyn Miller"]]
+   (when-let [creating-new-game? @(subscribe [::subs/creating-new-game?])]
+     (new-game-modal))
+   (when-let [joining-game? @(subscribe [::subs/joining-game?])]
+     (join-game-modal))])
 
 (defn joining-view
   []
@@ -69,13 +129,13 @@
                   (tile (inc tile-index) up?)) tiles)])
 
 (defn player-tile
-  [player-index [id {:keys [state tiles last-roll]}]]
+  [player-index [player-id {:keys [state name tiles last-roll]}]]
   (with-meta
     [:div.player
      {:class (str "avatar" player-index)}
      [player-icon]
-     [:div.player-id
-      (str "Player #" id)]
+     [:div.player-name
+      name]
      [:div.player-state
       {:class state}
       (case state

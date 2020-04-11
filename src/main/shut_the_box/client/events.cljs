@@ -63,13 +63,56 @@
            :channel channel
            :peers #{})))
 
-(reg-event-fx
+(reg-event-db
   ::new-game
+  (fn [db [_]]
+    (assoc db :creating-new-game? true)))
+
+(reg-event-db
+  ::update-player-name
+  (fn [db [_ player-name]]
+    (assoc db :player-name player-name)))
+
+(reg-event-fx
+  ::start-new-game
   (fn [{:keys [db]} [_]]
     ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
-    (server/new-game!)
+    (server/new-game! (:player-name db))
     {:db (assoc db
+                :creating-new-game? false
                 :state :joining)}))
+
+(reg-event-db
+  ::cancel-new-game
+  (fn [db [_]]
+    (assoc db :creating-new-game? false)))
+
+(reg-event-db
+  ::join-game
+  (fn [db [_]]
+    (assoc db :joining-game? true)))
+
+(reg-event-db
+  ::update-game-id
+  (fn [db [_ game-id]]
+    (assoc db :game-id game-id)))
+
+(reg-event-fx
+  ::start-join-game
+  (fn [{:keys [db]} [_]]
+    ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
+    ;; TODO Should verify with a spec that game-id in the db is always a
+    ;; number (since we had that wrong at first).
+    (server/join-game! (:game-id db)
+                       (:player-name db))
+    {:db (assoc db
+                :joining-game? false
+                :state :joining)}))
+
+(reg-event-db
+  ::cancel-join-game
+  (fn [db [_]]
+    (assoc db :joining-game? false)))
 
 (reg-event-fx
   ::publish-video

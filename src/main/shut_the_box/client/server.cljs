@@ -37,5 +37,9 @@
            conn))
 
 (defn new-game!
-  []
-  (game-client/send! @conn [:new-game]))
+  [player-name]
+  (game-client/send! @conn [:new-game player-name]))
+
+(defn join-game!
+  [game-id player-name]
+  (game-client/send! @conn [:join-game game-id player-name]))

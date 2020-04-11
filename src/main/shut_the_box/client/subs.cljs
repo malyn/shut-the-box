@@ -15,6 +15,16 @@
     state))
 
 (reg-sub
+  ::creating-new-game?
+  (fn [{:keys [creating-new-game?]}]
+    creating-new-game?))
+
+(reg-sub
+  ::joining-game?
+  (fn [{:keys [joining-game?]}]
+    joining-game?))
+
+(reg-sub
   ::game-id
   (fn [{:keys [game-id]}]
     game-id))

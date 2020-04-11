@@ -16,8 +16,8 @@
 
 (defn ws-send!
   [socket-id msg]
-  (-> (get @sockets socket-id)
-      (.send (prn-str msg))))
+  (some-> (get @sockets socket-id)
+          (.send (prn-str msg))))
 
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,7 +35,10 @@
     ;; and not assume that player-id is 1:1 with socket-id
     ;; (which won't be true once we have real auth and allow
     ;; reconnects).
-    (ws-send! player-id [:game game-id game])))
+    (try
+      (ws-send! player-id [:game game-id game])
+      (catch :default err
+        (log/errorf "[p%d] ws-send! threw error: %s" player-id err)))))
 
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -49,18 +52,18 @@
 ;; this approach is quickly falling apart and we need to move to more of
 ;; the actor/clock model).
 
-(defn new-game [socket-id player-id]
+(defn new-game [socket-id player-id player-name]
   (async/go
     (let [game (-> (game-logic/new)
-                   (game-logic/add-player player-id))
+                   (game-logic/add-player player-id player-name))
           game-id (<! (db/create-game! @db/conn game))]
       (ws-send! socket-id [:game game-id game]))))
 
-(defn join-game [socket-id game-id player-id]
+(defn join-game [socket-id game-id player-id player-name]
   (async/go
     ;; Get the game and add the player to the game.
     (if-let [game (some-> (<! (db/get-game @db/conn game-id))
-                          (game-logic/add-player player-id))]
+                          (game-logic/add-player player-id player-name))]
       (update-game! game-id game)
 
       ;; Couldn't add the player; probably the game has already started
@@ -167,9 +170,10 @@
         player-id socket-id]
     (log/debugf "[%d] Rcvd: op=%s, args=%s" socket-id op args)
     (case op
-      :new-game (new-game socket-id player-id)
-      :join-game (let [[game-id] args]
-                   (join-game socket-id game-id player-id))
+      :new-game (let [[player-name] args]
+                  (new-game socket-id player-id player-name))
+      :join-game (let [[game-id player-name] args]
+                   (join-game socket-id game-id player-id player-name))
       :start-round (let [[game-id] args]
                      (start-round socket-id game-id player-id))
       :roll-dice (let [[game-id] args]

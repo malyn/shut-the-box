@@ -18,12 +18,13 @@
    :players {}})
 
 (defn add-player
-  [game player-id]
+  [game player-id player-name]
   (when (and (= (:state game) :waiting)
              (not (contains? (:players game) player-id)))
     (assoc-in game
               [:players player-id]
               {:state :waiting
+               :name player-name
                :tiles (tile/reset)})))
 
 (defn valid-player?
