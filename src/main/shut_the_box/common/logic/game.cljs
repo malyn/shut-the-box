@@ -47,13 +47,13 @@
   (when (and (= state :playing)
              (valid-player? game player-id)
              (-> game :players (get player-id) :state (= :rolling)))
-    (let [roll (apply + (repeatedly num-dice #(inc (rand-int 6))))
+    (let [roll (repeatedly num-dice #(inc (rand-int 6)))
           game (assoc-in game [:players player-id :last-roll] roll)]
       ;; Can the player satisfy this roll? If so, they are in the
       ;; thinking state, if not, they are done.
       (if (seq (tile/valid-combinations
                  (-> game :players (get player-id) :tiles)
-                 roll))
+                 (apply + roll)))
         (assoc-in game [:players player-id :state] :thinking)
         (assoc-in game [:players player-id :state] :done)))))
 
@@ -64,7 +64,7 @@
              (-> game :players (get player-id) :state (= :thinking)))
     (let [player (get players player-id)]
       (when (tile/valid-combination? (:tiles player)
-                                     (:last-roll player)
+                                     (apply + (:last-roll player))
                                      tiles)
         (let [game (update-in game [:players player-id :tiles] tile/shut tiles)]
           (if (tile/shut-the-box? (-> game :players (get player-id) :tiles))

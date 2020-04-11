@@ -79,7 +79,9 @@
               (game/set-active-player player1-id)
               (game/roll-dice player1-id))]
     ;; The player has a valid roll and is now :thinking.
-    (is (<= 2 (-> g :players (get player1-id) :last-roll) 12))
+    (is (= 2 (-> g :players (get player1-id) :last-roll count)))
+    (is (<= 1 (-> g :players (get player1-id) :last-roll (nth 0)) 6))
+    (is (<= 1 (-> g :players (get player1-id) :last-roll (nth 1)) 6))
     (is (= :thinking (-> g :players (get player1-id) :state)))
 
     ;; The active player cannot re-roll until they have submitted their
@@ -118,7 +120,7 @@
     ;; namespace actually does implement things like sequencing?
     ;; `websocket` could then avoid doing that on its own, which I think
     ;; would be better.
-    (is (<= 2 (-> g :players (get player1-id) :last-roll) 12))
+    (is (= 2 (-> g :players (get player1-id) :last-roll count)))
     (is (= :done (-> g :players (get player1-id) :state)))
     (is (= :playing (-> g :state)))
     (is (= :waiting (-> g :players (get player2-id) :state))))
@@ -138,7 +140,7 @@
               (update-in [:players player1-id]
                          assoc
                          :state :thinking
-                         :last-roll 8
+                         :last-roll [2 6]
                          :tiles (tile-bits #{2 3 4 5 6 8 9 10})))]
     ;; Tiles that match the sum can be shut; the player's state goes
     ;; back to :rolling after they shut tiles.
@@ -159,7 +161,7 @@
     (let [g (-> g
                 (update-in [:players player1-id]
                            assoc
-                           :last-roll 8
+                           :last-roll [4 4]
                            :tiles (tile-bits #{2 6}))
                 (game/shut-tiles player1-id [2 6]))]
       (is (= (tile-bits #{}) (-> g :players (get player1-id) :tiles)))
