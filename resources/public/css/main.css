@@ -104,3 +104,98 @@ button {
   font-size: 0.75rem;
   font-style: italic;
 }
+
+/* ---------------------------------------------------------------------
+ * Game Screen
+ */
+
+.playing .player {
+  margin: 16px 8px 0px 8px;
+  display: grid;
+  grid-template-columns: 72px auto auto;
+  grid-template-rows: 24px 48px;
+  grid-column-gap: 4px;
+}
+
+.playing .player .player-id {
+  grid-row: 1/2;
+  grid-column: 2/3;
+  font-size: 1.25em;
+}
+
+.playing .player .player-state {
+  grid-row: 1/2;
+  grid-column: 3/4;
+  text-align: right;
+}
+
+.playing .player .player-state.done {
+  filter: opacity(0.2);
+}
+
+.playing .player .tiles {
+  grid-row: 2/3;
+  grid-column: 2/4;
+  display: flex;
+  align-items: flex-end;
+}
+
+.tile {
+  width: 10%;
+  margin: 0 2px 0px 2px;
+  color: #414040;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.tile.up { height: 100%; }
+.tile.down { height: 16px; }
+
+.tile.avatar0  { background-color: #a16639; } /* bear */
+.tile.avatar1  { background-color: #ffcc00; } /* chick */
+.tile.avatar2  { background-color: #ffaaff; } /* cow */
+.tile.avatar3  { background-color: #9f9898; } /* dog */
+.tile.avatar4  { background-color: #d2d0d0; } /* elephant */
+.tile.avatar5  { background-color: #4178c2; } /* hippo */
+.tile.avatar6  { background-color: #f3dbc8; } /* horse */
+.tile.avatar7  { background-color: #528cdb; } /* narwhal */
+.tile.avatar8  { background-color: #d23007; } /* parrot */
+.tile.avatar9  { background-color: #365a66; } /* penguin */
+.tile.avatar10 { background-color: #ee9fee; } /* pig */
+.tile.avatar11 { background-color: #bdb6b6; } /* rhino */
+
+.tile .number {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.25em;
+}
+
+.avatar {
+  grid-row: 1/3;
+  grid-column: 1/1;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar { background-size: contain; }
+.avatar.avatar0  { background-image: url(/img/avatars/bear.png); }
+.avatar.avatar1  { background-image: url(/img/avatars/chick.png); }
+.avatar.avatar2  { background-image: url(/img/avatars/cow.png); }
+.avatar.avatar3  { background-image: url(/img/avatars/dog.png); }
+.avatar.avatar4  { background-image: url(/img/avatars/elephant.png); }
+.avatar.avatar5  { background-image: url(/img/avatars/hippo.png); }
+.avatar.avatar6  { background-image: url(/img/avatars/horse.png); }
+.avatar.avatar7  { background-image: url(/img/avatars/narwhal.png); }
+.avatar.avatar8  { background-image: url(/img/avatars/parrot.png); }
+.avatar.avatar9  { background-image: url(/img/avatars/penguin.png); }
+.avatar.avatar10 { background-image: url(/img/avatars/pig.png); }
+.avatar.avatar11 { background-image: url(/img/avatars/rhino.png); }
+
+.dice {
+  display: flex;
+  justify-content: flex-end;
+  height: 100%;
+  padding: 0 2px 4px 0;
+}
