@@ -7,4 +7,5 @@
 
 (def default-db
   {:state :unjoined
+   :selected-tiles #{}
    :peers #{}})

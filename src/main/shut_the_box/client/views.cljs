@@ -95,7 +95,9 @@
   [:div.avatar])
 
 (defn die
-  [x]
+  [index x]
+  ;; TODO Can we apply the metadata during the map? It's such a hassle
+  ;; to have to pass the `index` around to all of these things...
   (with-meta
     [:img.die
      {:src (str "/img/dice/dieWhite" x ".png")
@@ -106,12 +108,12 @@
               :height "100%"
               :width "auto"
               :margin-left "4px"}}]
-    {:key (str "dice-" x)}))
+    {:key (str "dice-" index)}))
 
 (defn dice
   [xs]
   [:div.dice
-   (map die xs)])
+   (map-indexed die xs)])
 
 (defn tile
   [n up?]
@@ -146,12 +148,82 @@
      [tile-set tiles]]
     {:key (str "player-tile-" player-index)}))
 
+(defn game-waiting-actions
+  []
+  [:div.actions
+   [:button.start-round
+    {:on-click #(dispatch [::events/start-round])}
+    "Start Round"]])
+
+(defn game-done-actions
+  []
+  [:div.actions
+   [:button.start-round
+    {:on-click #(dispatch [::events/start-round])}
+    "Start Next Round"]])
+
+(defn rolling-player-actions
+  [player]
+  [:div.actions
+   [:button.start-round
+    {:on-click #(dispatch [::events/roll-dice])}
+    "Roll Dice"]])
+
+(defn thinking-player-actions
+  [player selected-tiles]
+  [:div.actions
+   [:div.selectable-tiles
+    ;; TODO Need to get player-index from the player data (per TODO.md)
+    {:class (str "avatar" 4)}
+    (map-indexed
+      (fn [index up?]
+        (let [tile-num (inc index)]
+          (with-meta
+            [:div.possible-tile
+             (cond
+               (not up?)
+               {:class "down"}
+
+               (contains? selected-tiles tile-num)
+               {:class "selected"
+                :on-click #(dispatch [::events/deselect-tile tile-num])}
+
+               :else
+               {:class "up"
+                :on-click #(dispatch [::events/select-tile tile-num])})
+             [:div.number
+              tile-num]]
+            {:key (str "tile-" tile-num)})))
+      (:tiles player))]
+   [:button.ok
+    {:on-click #(dispatch [::events/shut-tiles])}
+    "Ok"]
+   [:button.undo
+    {:on-click #(dispatch [::events/undo-tiles])}
+    "Undo"]])
+
+(defn done-player-actions
+  [player]
+  [:div.actions])
+
+(defn waiting-player-actions
+  [player]
+  [:div.actions])
+
 (defn playing-view
-  [game-id game]
+  [game-id game player selected-tiles]
   [:div.playing
-   [:h1 (str "Game #" game-id)]
-   [:div
-    (map-indexed player-tile (:players game))]])
+   [:div.title
+    [:div (str "Game #" game-id)]]
+   [:div.players
+    (map-indexed player-tile (:players game))]
+   (cond
+     (= :waiting (:state game)) (game-waiting-actions)
+     (= :done (:state game)) (game-done-actions)
+     (#{:waiting} (:state player)) (waiting-player-actions player)
+     (#{:rolling} (:state player)) (rolling-player-actions player)
+     (#{:thinking} (:state player)) (thinking-player-actions player selected-tiles)
+     (#{:done} (:state player)) (done-player-actions player))])
 
 (defn main-panel
   []
@@ -160,4 +232,6 @@
       :unjoined (join-view)
       :joining (joining-view)
       :joined (playing-view @(subscribe [::subs/game-id])
-                            @(subscribe [::subs/game])))))
+                            @(subscribe [::subs/game])
+                            @(subscribe [::subs/player])
+                            @(subscribe [::subs/selected-tiles])))))

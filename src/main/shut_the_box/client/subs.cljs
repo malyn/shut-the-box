@@ -34,6 +34,16 @@
   (fn [{:keys [game]}]
     game))
 
+(reg-sub
+  ::player
+  (fn [{:keys [player-id game]}]
+    (-> game :players (get player-id))))
+
+(reg-sub
+  ::selected-tiles
+  (fn [{:keys [selected-tiles]}]
+    selected-tiles))
+
 
 ;; =====================================================================
 ;; LAYER 3 Subscriptions

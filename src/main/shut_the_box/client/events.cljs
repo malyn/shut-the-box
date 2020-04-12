@@ -115,6 +115,40 @@
     (assoc db :joining-game? false)))
 
 (reg-event-fx
+  ::start-round
+  (fn [{:keys [db]} [_]]
+    ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
+    (server/start-round! (:game-id db))))
+
+(reg-event-fx
+  ::roll-dice
+  (fn [{:keys [db]} [_]]
+    ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
+    (server/roll-dice! (:game-id db))))
+
+(reg-event-db
+  ::select-tile
+  (fn [db [_ tile]]
+    (update db :selected-tiles conj tile)))
+
+(reg-event-db
+  ::deselect-tile
+  (fn [db [_ tile]]
+    (update db :selected-tiles disj tile)))
+
+(reg-event-db
+  ::shut-tiles
+  (fn [db [_]]
+    ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
+    (server/shut-tiles! (:game-id db) (vec (:selected-tiles db)))
+    (assoc db :selected-tiles #{})))
+
+(reg-event-db
+  ::undo-tiles
+  (fn [db [_ tile]]
+    (assoc db :selected-tiles #{})))
+
+(reg-event-fx
   ::publish-video
   (fn [{:keys [db]} [_ {:keys [on-success on-failure]}]]
     (agora/create-stream!

@@ -43,3 +43,15 @@
 (defn join-game!
   [game-id player-name]
   (game-client/send! @conn [:join-game game-id player-name]))
+
+(defn start-round!
+  [game-id]
+  (game-client/send! @conn [:start-round game-id]))
+
+(defn roll-dice!
+  [game-id]
+  (game-client/send! @conn [:roll-dice game-id]))
+
+(defn shut-tiles!
+  [game-id tiles]
+  (game-client/send! @conn [:shut-tiles game-id tiles]))

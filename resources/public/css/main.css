@@ -199,3 +199,44 @@ button {
   height: 100%;
   padding: 0 2px 4px 0;
 }
+
+.actions {
+  display: flex;
+  flex-flow: column;
+}
+
+.actions button {
+  margin: 2rem;
+  font-size: 2rem;
+}
+
+.selectable-tiles {
+  width: calc(100vw - (2 * 8px));
+  height: 40vw; /* each cell is 20vw and we want 2x cells of rows */
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+  margin: 8px;
+}
+
+.possible-tile {
+  height: 100%;
+  width: 100%;
+  color: #414040;
+  border: 5px solid #9f9898; /* dog */
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.possible-tile.up { color: #9f9898; }
+.possible-tile.selected { background-color: #9f9898; }
+.possible-tile.down .number { display: none; }
+
+.possible-tile .number {
+  text-align: center;
+  font-weight: 700;
+  font-size: 2em;
+}
