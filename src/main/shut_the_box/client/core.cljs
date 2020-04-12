@@ -18,12 +18,22 @@
   (.addEventListener (.getElementById js/document "app")
                      "touchmove"
                      (fn [e] (.preventDefault e))
+                     false)
+  ;; iOS 13 (?) changed the behavior and now we also have to prevent
+  ;; "click" events.
+  (.addEventListener (.getElementById js/document "app")
+                     "click"
+                     (fn [e] (.preventDefault e))
                      false))
 
 (defn ensure-max-size [id]
   (.scrollTo js/window 0 0)
-  (let [viewport-width (.-innerWidth js/window)
-        viewport-height (.-innerHeight js/window)]
+  ;; This was innerWidth/innerHeight, but we changed it since it seemed
+  ;; like something in iOS (13?) broke how this used to work. Just an
+  ;; FYI, since we may need to adjust this (for example, in standalone
+  ;; mode).
+  (let [viewport-width (.-clientWidth js/window)
+        viewport-height (.-clientHeight js/window)]
     (doto (-> js/document (.getElementById id) .-style)
           (set! -position "fixed")
           (set! -top "0")

@@ -3,7 +3,7 @@
 }
 
 html {
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 html, body, div, span, ul, li {
