@@ -13,7 +13,7 @@
   (apply +
          (map-indexed
            (fn [idx up?]
-             (if up? idx 0))
+             (if up? (inc idx) 0))
            tiles)))
 
 (defn is-valid?

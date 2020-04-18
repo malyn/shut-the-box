@@ -12,13 +12,15 @@
   (let [tiles (tile-bits #{1 3 4 5 6 8 9 10})]
     (is (vector? tiles))
     (is (= tile/num-tiles (count tiles)))
-    (is (= [true false true true true true false true true true] tiles))))
+    (is (= [true false true true true true false true true true] tiles))
+    (is (= 46 (tile/score tiles)))))
 
 (deftest reset-test
   (let [tiles (tile/reset)]
     (is (vector? tiles))
     (is (= tile/num-tiles (count tiles)))
-    (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) tiles))))
+    (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) tiles))
+    (is (= 55 (tile/score tiles)))))
 
 (deftest can-shut?-test
   (let [tiles (tile-bits #{1 3 4 5 6 8 9 10})]
@@ -43,7 +45,9 @@
 
 (deftest shut-the-box?-test
   (is (false? (tile/shut-the-box? (tile-bits #{1}))))
+  (is (= 1 (tile/score (tile-bits #{1}))))
   (is (true? (tile/shut-the-box? (tile-bits #{}))))
+  (is (= 0 (tile/score (tile-bits #{}))))
   (is (false? (-> (tile-bits #{2 7})
                   (tile/shut 2)
                   tile/shut-the-box?)))
