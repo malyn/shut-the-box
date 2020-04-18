@@ -99,15 +99,8 @@
   ;; TODO Can we apply the metadata during the map? It's such a hassle
   ;; to have to pass the `index` around to all of these things...
   (with-meta
-    [:img.die
-     {:src (str "/img/dice/dieWhite" x ".png")
-      :width "64"
-      :height "64"
-      :style {;; Set max height, then auto-scale width to keep aspect
-              ;; ratio.
-              :height "100%"
-              :width "auto"
-              :margin-left "4px"}}]
+    [:div.die
+     {:class (str "die" x)}]
     {:key (str "dice-" index)}))
 
 (defn dice
@@ -124,11 +117,41 @@
       (if up? n "")]]
     {:key (str "tile-" n)}))
 
+;; 5x2 matrix of bordered numbers
 (defn tile-set
   [tiles]
   [:div.tiles
    (map-indexed (fn [tile-index up?]
                   (tile (inc tile-index) up?)) tiles)])
+
+;; Small, horizontal line of numbers
+#_(defn tile-set
+  [tiles]
+  [:div
+   {:style {:display "flex"}}
+   (map-indexed
+     (fn [tile-index up?]
+       [:div
+        {:style (merge {:width "6vw"
+                        :height "6vw"
+                        ;;:color "#a16639"
+                        ;;:background-color "#a16639"
+                        ;;:border-radius "2px"
+                        :margin-left "2px"
+                        :font-weight "700"
+                        :display "flex"
+                        :justify-content "center"
+                        :align-items "center"
+                        }
+                       (if up?
+                         {:color "#454343"
+                          :background-color "#a16639"
+                          :border-radius "2px"}
+                         {:color "#a16639"
+                          :font-weight "400"}))}
+        [:div
+         (inc tile-index)]])
+     tiles)])
 
 (defn player-tile
   [player-index [player-id {:keys [state name tiles last-roll]}]]
@@ -138,14 +161,20 @@
      [player-icon]
      [:div.player-name
       name]
-     [:div.player-state
-      {:class state}
-      (case state
-        :rolling "Rolling..."
-        :thinking (dice last-roll)
-        :done (dice last-roll)
-        "")]
-     [tile-set tiles]]
+     [tile-set tiles]
+     (case state
+       :waiting [:div.state
+                 [:div.state-title "Waiting"]
+                 [:div.state-value "- -"]]
+       :rolling [:div.state
+                 [:div.state-title "Rolling"]
+                 [:div.state-value ""]]
+       :thinking [:div.state
+                  [:div.state-title "Last Roll"]
+                  [:div.state-value (dice last-roll)]]
+       :done [:div.state
+              [:div.state-title "Score"]
+              [:div.state-value "27"]])]
     {:key (str "player-tile-" player-index)}))
 
 (defn game-waiting-actions

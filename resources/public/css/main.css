@@ -109,75 +109,47 @@ button {
  * Game Screen
  */
 
-.playing .player {
-  margin: 16px 8px 0px 8px;
+:root {
+  --avatar-size: 64px; /* 80px, 96px */
+  --row-size: calc(0.34 * var(--avatar-size));
+}
+
+.playing {
+  height: 100%;
   display: grid;
-  grid-template-columns: 72px auto auto;
-  grid-template-rows: 24px 48px;
+  grid-template-columns: 100%;
+  grid-template-rows: calc(0.5 * var(--avatar-size)) min-content auto;
+}
+
+.playing .title {
+}
+
+.playing .players {
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: var(--avatar-size);
+  grid-row-gap: 8px;
+}
+
+.playing .actions {
+}
+
+.playing .player {
+  width: 100%;
+  height: var(--avatar-size);
+  display: grid;
+  overflow: hidden;
+  grid-template-columns: var(--avatar-size) auto var(--avatar-size);
+  grid-template-rows: 35% 65%;
   grid-column-gap: 4px;
 }
 
-.playing .player .player-name {
-  grid-row: 1/2;
-  grid-column: 2/3;
-  font-size: 1.25em;
-}
-
-.playing .player .player-state {
-  grid-row: 1/2;
-  grid-column: 3/4;
-  text-align: right;
-}
-
-.playing .player .player-state.done {
-  filter: opacity(0.2);
-}
-
-.playing .player .tiles {
-  grid-row: 2/3;
-  grid-column: 2/4;
-  display: flex;
-  align-items: flex-end;
-}
-
-.tile {
-  width: 10%;
-  margin: 0 2px 0px 2px;
-  color: #414040;
-  border-radius: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.tile.up { height: 100%; }
-.tile.down { height: 16px; }
-
-.avatar0  .tile { background-color: #a16639; } /* bear */
-.avatar1  .tile { background-color: #ffcc00; } /* chick */
-.avatar2  .tile { background-color: #ffaaff; } /* cow */
-.avatar3  .tile { background-color: #9f9898; } /* dog */
-.avatar4  .tile { background-color: #d2d0d0; } /* elephant */
-.avatar5  .tile { background-color: #4178c2; } /* hippo */
-.avatar6  .tile { background-color: #f3dbc8; } /* horse */
-.avatar7  .tile { background-color: #528cdb; } /* narwhal */
-.avatar8  .tile { background-color: #d23007; } /* parrot */
-.avatar9  .tile { background-color: #365a66; } /* penguin */
-.avatar10 .tile { background-color: #ee9fee; } /* pig */
-.avatar11 .tile { background-color: #bdb6b6; } /* rhino */
-
-.tile .number {
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.25em;
-}
-
-.avatar {
-  grid-row: 1/3;
-  grid-column: 1/1;
-  width: 100%;
-  height: 100%;
+.playing .player .avatar {
   background-size: contain;
+  background-repeat: no-repeat;
+  grid-row: 1/3;
+  grid-column: 1/2;
 }
 
 .avatar0  .avatar { background-image: url(/img/avatars/bear.png); }
@@ -193,12 +165,139 @@ button {
 .avatar10 .avatar { background-image: url(/img/avatars/pig.png); }
 .avatar11 .avatar { background-image: url(/img/avatars/rhino.png); }
 
-.dice {
-  display: flex;
-  justify-content: flex-end;
-  height: 100%;
-  padding: 0 2px 4px 0;
+.playing .player .player-name {
+  grid-row: 1/2;
+  grid-column: 2/4;
+  /* - 6px is to allow for the descenders */
+  font-size: calc(var(--row-size) - 6px);
+  overflow: hidden;
 }
+
+.playing .player .tiles {
+  grid-row: 2/3;
+  grid-column: 2/3;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-column-gap: 4px;
+  grid-row-gap: 4px;
+}
+
+.tile {
+  color: #414040;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+}
+
+.tile.down .number { display: none; }
+
+.avatar0  .tile.up { background-color: #a16639; } /* bear */
+.avatar1  .tile.up { background-color: #ffcc00; } /* chick */
+.avatar2  .tile.up { background-color: #ffaaff; } /* cow */
+.avatar3  .tile.up { background-color: #9f9898; } /* dog */
+.avatar4  .tile.up { background-color: #d2d0d0; } /* elephant */
+.avatar5  .tile.up { background-color: #4178c2; } /* hippo */
+.avatar6  .tile.up { background-color: #f3dbc8; } /* horse */
+.avatar7  .tile.up { background-color: #528cdb; } /* narwhal */
+.avatar8  .tile.up { background-color: #d23007; } /* parrot */
+.avatar9  .tile.up { background-color: #365a66; } /* penguin */
+.avatar10 .tile.up { background-color: #ee9fee; } /* pig */
+.avatar11 .tile.up { background-color: #bdb6b6; } /* rhino */
+
+.avatar0  .tile.down { border: 4px solid #a16639; } /* bear */
+.avatar1  .tile.down { border: 4px solid #ffcc00; } /* chick */
+.avatar2  .tile.down { border: 4px solid #ffaaff; } /* cow */
+.avatar3  .tile.down { border: 4px solid #9f9898; } /* dog */
+.avatar4  .tile.down { border: 4px solid #d2d0d0; } /* elephant */
+.avatar5  .tile.down { border: 4px solid #4178c2; } /* hippo */
+.avatar6  .tile.down { border: 4px solid #f3dbc8; } /* horse */
+.avatar7  .tile.down { border: 4px solid #528cdb; } /* narwhal */
+.avatar8  .tile.down { border: 4px solid #d23007; } /* parrot */
+.avatar9  .tile.down { border: 4px solid #365a66; } /* penguin */
+.avatar10 .tile.down { border: 4px solid #ee9fee; } /* pig */
+.avatar11 .tile.down { border: 4px solid #bdb6b6; } /* rhino */
+
+.playing .player .state {
+  grid-row: 2/3;
+  grid-column: 3/4;
+  display: flex;
+  flex-direction: column;
+}
+
+.playing .player .state-title {
+  color: #414040;
+  text-align: center;
+  padding: 2px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar0  .state-title { background-color: #a16639; } /* bear */
+.avatar1  .state-title { background-color: #ffcc00; } /* chick */
+.avatar2  .state-title { background-color: #ffaaff; } /* cow */
+.avatar3  .state-title { background-color: #9f9898; } /* dog */
+.avatar4  .state-title { background-color: #d2d0d0; } /* elephant */
+.avatar5  .state-title { background-color: #4178c2; } /* hippo */
+.avatar6  .state-title { background-color: #f3dbc8; } /* horse */
+.avatar7  .state-title { background-color: #528cdb; } /* narwhal */
+.avatar8  .state-title { background-color: #d23007; } /* parrot */
+.avatar9  .state-title { background-color: #365a66; } /* penguin */
+.avatar10 .state-title { background-color: #ee9fee; } /* pig */
+.avatar11 .state-title { background-color: #bdb6b6; } /* rhino */
+
+.playing .player .state-value {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-style: none solid solid solid;
+  border-width: 4px;
+  border-radius: 0 0 4px 4px;
+  font-size: 1.5rem;
+  /* Prevent the text from enlarging the box. */
+  overflow: hidden;
+}
+.avatar0  .state-value { border-color: #a16639; } /* bear */
+.avatar1  .state-value { border-color: #ffcc00; } /* chick */
+.avatar2  .state-value { border-color: #ffaaff; } /* cow */
+.avatar3  .state-value { border-color: #9f9898; } /* dog */
+.avatar4  .state-value { border-color: #d2d0d0; } /* elephant */
+.avatar5  .state-value { border-color: #4178c2; } /* hippo */
+.avatar6  .state-value { border-color: #f3dbc8; } /* horse */
+.avatar7  .state-value { border-color: #528cdb; } /* narwhal */
+.avatar8  .state-value { border-color: #d23007; } /* parrot */
+.avatar9  .state-value { border-color: #365a66; } /* penguin */
+.avatar10 .state-value { border-color: #ee9fee; } /* pig */
+.avatar11 .state-value { border-color: #bdb6b6; } /* rhino */
+
+.dice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 4px;
+}
+
+.die1, .die2, .die3, .die4, .die5, .die6 {
+  background-size: contain;
+  background-repeat: no-repeat;
+  /* 6px to get some padding; 2px of that comes from the padding we used
+   * in the state-title */
+  width: calc(var(--row-size) - 6px);
+  height: calc(var(--row-size) - 6px);
+}
+
+.die1 { background-image: url(/img/dice/dieWhite1.png); }
+.die2 { background-image: url(/img/dice/dieWhite2.png); }
+.die3 { background-image: url(/img/dice/dieWhite3.png); }
+.die4 { background-image: url(/img/dice/dieWhite4.png); }
+.die5 { background-image: url(/img/dice/dieWhite5.png); }
+.die6 { background-image: url(/img/dice/dieWhite6.png); }
 
 .actions {
   display: flex;
