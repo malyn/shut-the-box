@@ -4,6 +4,7 @@
     [shut-the-box.client.events :as events]
     [shut-the-box.client.subs :as subs]
     [shut-the-box.client.ui :refer [modal]]
+    [shut-the-box.common.logic.tile :as tile-logic]
     [taoensso.timbre :as log]))
 
 (defn new-game-modal
@@ -174,36 +175,38 @@
                   [:div.state-value (dice last-roll)]]
        :done [:div.state
               [:div.state-title "Score"]
-              [:div.state-value "27"]])]
+              [:div.state-value (tile-logic/score tiles)]])]
     {:key (str "player-tile-" player-index)}))
 
 (defn game-waiting-actions
   []
   [:div.actions
-   [:button.start-round
+   [:div.start-round
     {:on-click #(dispatch [::events/start-round])}
     "Start Round"]])
 
 (defn game-done-actions
   []
   [:div.actions
-   [:button.start-round
+   [:div.start-round
     {:on-click #(dispatch [::events/start-round])}
     "Start Next Round"]])
 
 (defn rolling-player-actions
   [player]
   [:div.actions
-   [:button.start-round
+   [:div.roll-dice
     {:on-click #(dispatch [::events/roll-dice])}
     "Roll Dice"]])
 
 (defn thinking-player-actions
-  [player selected-tiles]
+  [{:keys [tiles last-roll] :as player} selected-tiles]
   [:div.actions
+   [:div.left-well
+    [dice last-roll]]
    [:div.selectable-tiles
     ;; TODO Need to get player-index from the player data (per TODO.md)
-    {:class (str "avatar" 4)}
+    {:class (str "avatar" 0)}
     (map-indexed
       (fn [index up?]
         (let [tile-num (inc index)]
@@ -224,12 +227,14 @@
               tile-num]]
             {:key (str "tile-" tile-num)})))
       (:tiles player))]
-   [:button.ok
-    {:on-click #(dispatch [::events/shut-tiles])}
-    "Ok"]
-   [:button.undo
-    {:on-click #(dispatch [::events/undo-tiles])}
-    "Undo"]])
+   [:div.ok
+    (if (tile-logic/valid-combination? tiles
+                                       (apply + last-roll)
+                                       selected-tiles)
+      {:class "enabled"
+       :on-click #(dispatch [::events/shut-tiles])}
+      {:class "disabled"})
+    "Ok"]])
 
 (defn done-player-actions
   [player]

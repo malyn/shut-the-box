@@ -8,6 +8,14 @@
   []
   (vec (repeat num-tiles true)))
 
+(defn score
+  [tiles]
+  (apply +
+         (map-indexed
+           (fn [idx up?]
+             (if up? idx 0))
+           tiles)))
+
 (defn is-valid?
   [n]
   (<= 1 n num-tiles))

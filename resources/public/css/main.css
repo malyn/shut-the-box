@@ -207,18 +207,18 @@ button {
 .avatar10 .tile.up { background-color: #ee9fee; } /* pig */
 .avatar11 .tile.up { background-color: #bdb6b6; } /* rhino */
 
-.avatar0  .tile.down { border: 4px solid #a16639; } /* bear */
-.avatar1  .tile.down { border: 4px solid #ffcc00; } /* chick */
-.avatar2  .tile.down { border: 4px solid #ffaaff; } /* cow */
-.avatar3  .tile.down { border: 4px solid #9f9898; } /* dog */
-.avatar4  .tile.down { border: 4px solid #d2d0d0; } /* elephant */
-.avatar5  .tile.down { border: 4px solid #4178c2; } /* hippo */
-.avatar6  .tile.down { border: 4px solid #f3dbc8; } /* horse */
-.avatar7  .tile.down { border: 4px solid #528cdb; } /* narwhal */
-.avatar8  .tile.down { border: 4px solid #d23007; } /* parrot */
-.avatar9  .tile.down { border: 4px solid #365a66; } /* penguin */
-.avatar10 .tile.down { border: 4px solid #ee9fee; } /* pig */
-.avatar11 .tile.down { border: 4px solid #bdb6b6; } /* rhino */
+/* .avatar0  .tile.down { border: 4px solid #a16639; } */ /* bear */
+/* .avatar1  .tile.down { border: 4px solid #ffcc00; } */ /* chick */
+/* .avatar2  .tile.down { border: 4px solid #ffaaff; } */ /* cow */
+/* .avatar3  .tile.down { border: 4px solid #9f9898; } */ /* dog */
+/* .avatar4  .tile.down { border: 4px solid #d2d0d0; } */ /* elephant */
+/* .avatar5  .tile.down { border: 4px solid #4178c2; } */ /* hippo */
+/* .avatar6  .tile.down { border: 4px solid #f3dbc8; } */ /* horse */
+/* .avatar7  .tile.down { border: 4px solid #528cdb; } */ /* narwhal */
+/* .avatar8  .tile.down { border: 4px solid #d23007; } */ /* parrot */
+/* .avatar9  .tile.down { border: 4px solid #365a66; } */ /* penguin */
+/* .avatar10 .tile.down { border: 4px solid #ee9fee; } */ /* pig */
+/* .avatar11 .tile.down { border: 4px solid #bdb6b6; } */ /* rhino */
 
 .playing .player .state {
   grid-row: 2/3;
@@ -277,13 +277,13 @@ button {
 .avatar10 .state-value { border-color: #ee9fee; } /* pig */
 .avatar11 .state-value { border-color: #bdb6b6; } /* rhino */
 
-.dice {
+.player .dice {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-column-gap: 4px;
 }
 
-.die1, .die2, .die3, .die4, .die5, .die6 {
+.player .die1, .player .die2, .player .die3, .player .die4, .player .die5, .player .die6 {
   background-size: contain;
   background-repeat: no-repeat;
   /* 6px to get some padding; 2px of that comes from the padding we used
@@ -300,42 +300,96 @@ button {
 .die6 { background-image: url(/img/dice/dieWhite6.png); }
 
 .actions {
-  display: flex;
-  flex-flow: column;
+  display: grid;
+  grid-template-columns: calc(0.75 * var(--avatar-size)) auto calc(0.75 * var(--avatar-size));
+  grid-template-rows: min-content;
+
+  --item-size: calc(0.5 * var(--avatar-size));
 }
 
-.actions button {
-  margin: 2rem;
+.actions .start-round, .actions .roll-dice {
+  grid-column: 1/4;
+  margin: 8px;
+  padding: 1rem;
+  /*
+  color: #414040;
+  background-color: #9f9898;
+  */
+  color: #414040;
+  background-color: #008040;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 2rem;
+  font-weight: 700;
+}
+
+.actions .left-well {
+  grid-column: 1/2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #008040;
+}
+
+.actions .dice {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-row-gap: 8px;
+}
+
+.actions .die1, .actions .die2, .actions .die3, .actions .die4, .actions .die5, .actions .die6 {
+  width: var(--item-size);
+  height: var(--item-size);
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .selectable-tiles {
-  width: calc(100vw - (2 * 8px));
-  height: 40vw; /* each cell is 20vw and we want 2x cells of rows */
+  padding: 8px;
+  grid-column: 2/3;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-column-gap: 8px;
   grid-row-gap: 8px;
-  margin: 8px;
 }
 
 .possible-tile {
   height: 100%;
   width: 100%;
   color: #414040;
-  border: 5px solid #9f9898; /* dog */
+  border-style: solid;
+  border-width: 5px;
   border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.possible-tile.up { color: #9f9898; }
-.possible-tile.selected { background-color: #9f9898; }
+.possible-tile { border-color: #008040; }
+.possible-tile.up { color: #008040; }
+.possible-tile.selected { background-color: #008040; }
+
 .possible-tile.down .number { display: none; }
 
 .possible-tile .number {
   text-align: center;
   font-weight: 700;
-  font-size: 2em;
+  font-size: calc(var(--item-size) - 8px);
+}
+
+.actions .ok {
+  grid-column: 3/4;
+  font-size: calc(var(--item-size) - 8px);
+  font-weight: 700;
+  color: #008040;
+  border: 4px solid #008040;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.actions .ok.enabled {
+  color: #414040;
+  background-color: #008040;
 }
