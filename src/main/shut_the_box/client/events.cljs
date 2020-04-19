@@ -143,10 +143,11 @@
     (server/shut-tiles! (:game-id db) (vec (:selected-tiles db)))
     (assoc db :selected-tiles #{})))
 
-(reg-event-db
-  ::undo-tiles
-  (fn [db [_ tile]]
-    (assoc db :selected-tiles #{})))
+(reg-event-fx
+  ::end-turn
+  (fn [{:keys [db]} [_]]
+    ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
+    (server/end-turn! (:game-id db))))
 
 (reg-event-fx
   ::publish-video

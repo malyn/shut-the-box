@@ -171,6 +171,9 @@
                  [:div.state-title "Rolling"]
                  [:div.state-value ""]]
        :thinking [:div.state
+                  [:div.state-title "Roll"]
+                  [:div.state-value (dice last-roll)]]
+       :no-moves [:div.state
                   [:div.state-title "Last Roll"]
                   [:div.state-value (dice last-roll)]]
        :done [:div.state
@@ -199,34 +202,38 @@
     {:on-click #(dispatch [::events/roll-dice])}
     "Roll Dice"]])
 
+(defn selectable-tiles
+  [{:keys [tiles last-roll]} selected-tiles]
+  [:div.selectable-tiles
+   ;; TODO Need to get player-index from the player data (per TODO.md)
+   {:class (str "avatar" 0)}
+   (map-indexed
+     (fn [index up?]
+       (let [tile-num (inc index)]
+         (with-meta
+           [:div.possible-tile
+            (cond
+              (not up?)
+              {:class "down"}
+
+              (contains? selected-tiles tile-num)
+              {:class "selected"
+               :on-click #(dispatch [::events/deselect-tile tile-num])}
+
+              :else
+              {:class "up"
+               :on-click #(dispatch [::events/select-tile tile-num])})
+            [:div.number
+             tile-num]]
+           {:key (str "tile-" tile-num)})))
+     tiles)])
+
 (defn thinking-player-actions
   [{:keys [tiles last-roll] :as player} selected-tiles]
   [:div.actions
    [:div.left-well
     [dice last-roll]]
-   [:div.selectable-tiles
-    ;; TODO Need to get player-index from the player data (per TODO.md)
-    {:class (str "avatar" 0)}
-    (map-indexed
-      (fn [index up?]
-        (let [tile-num (inc index)]
-          (with-meta
-            [:div.possible-tile
-             (cond
-               (not up?)
-               {:class "down"}
-
-               (contains? selected-tiles tile-num)
-               {:class "selected"
-                :on-click #(dispatch [::events/deselect-tile tile-num])}
-
-               :else
-               {:class "up"
-                :on-click #(dispatch [::events/select-tile tile-num])})
-             [:div.number
-              tile-num]]
-            {:key (str "tile-" tile-num)})))
-      (:tiles player))]
+   [selectable-tiles player selected-tiles]
    [:div.ok
     (if (tile-logic/valid-combination? tiles
                                        (apply + last-roll)
@@ -234,7 +241,18 @@
       {:class "enabled"
        :on-click #(dispatch [::events/shut-tiles])}
       {:class "disabled"})
-    "Ok"]])
+    [:i.fas.fa-check]]])
+
+(defn no-moves-player-actions
+  [{:keys [last-roll] :as player}]
+  [:div.actions.no-moves
+   [:div.left-well
+    [dice last-roll]]
+   [selectable-tiles player #{}]
+   [:div.ok
+    {:class "enabled"
+     :on-click #(dispatch [::events/end-turn])}
+    [:i.fas.fa-times]]])
 
 (defn done-player-actions
   [player]
@@ -257,6 +275,7 @@
      (#{:waiting} (:state player)) (waiting-player-actions player)
      (#{:rolling} (:state player)) (rolling-player-actions player)
      (#{:thinking} (:state player)) (thinking-player-actions player selected-tiles)
+     (#{:no-moves} (:state player)) (no-moves-player-actions player)
      (#{:done} (:state player)) (done-player-actions player))])
 
 (defn main-panel

@@ -332,6 +332,8 @@ button {
   background-color: #008040;
 }
 
+.actions.no-moves .left-well { background-color: #a00040; }
+
 .actions .dice {
   display: grid;
   grid-template-rows: 1fr 1fr;
@@ -370,6 +372,9 @@ button {
 .possible-tile.up { color: #008040; }
 .possible-tile.selected { background-color: #008040; }
 
+.no-moves .possible-tile { border-color: #a00040; }
+.no-moves .possible-tile.up { color: #a00040; }
+
 .possible-tile .number {
   text-align: center;
   font-weight: 700;
@@ -391,3 +396,6 @@ button {
   color: #414040;
   background-color: #008040;
 }
+
+.actions.no-moves .ok { border-color: #a00040; }
+.actions.no-moves .ok.enabled { background-color: #a00040; }

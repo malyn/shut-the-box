@@ -51,12 +51,12 @@
     (let [roll (repeatedly num-dice #(inc (rand-int 6)))
           game (assoc-in game [:players player-id :last-roll] roll)]
       ;; Can the player satisfy this roll? If so, they are in the
-      ;; thinking state, if not, they are done.
+      ;; thinking state, if not, they are no-moves.
       (if (seq (tile/valid-combinations
                  (-> game :players (get player-id) :tiles)
                  (apply + roll)))
         (assoc-in game [:players player-id :state] :thinking)
-        (assoc-in game [:players player-id :state] :done)))))
+        (assoc-in game [:players player-id :state] :no-moves)))))
 
 (defn shut-tiles
   [{:keys [state players] :as game} player-id tiles]
@@ -69,9 +69,17 @@
                                      tiles)
         (let [game (update-in game [:players player-id :tiles] tile/shut tiles)]
           (if (tile/shut-the-box? (-> game :players (get player-id) :tiles))
-            ;; Shut the box; the player's turn and the round are done.
+            ;; Shut the box; the player is shut-box and the game is
+            ;; done.
             (-> game
                 (assoc :state :done)
-                (assoc-in [:players player-id :state] :done))
+                (assoc-in [:players player-id :state] :shut-box))
             ;; Box not shut; player is back to rolling.
             (assoc-in game [:players player-id :state] :rolling)))))))
+
+(defn end-turn
+  [{:keys [state players] :as game} player-id]
+  (when (and (= state :playing)
+             (valid-player? game player-id)
+             (-> game :players (get player-id) :state (= :no-moves)))
+    (assoc-in game [:players player-id :state] :done)))

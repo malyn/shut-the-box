@@ -93,11 +93,10 @@
     (is (nil? (game/roll-dice g player2-id))))
 
   ;; A roll that has no possible actions needs to immediately transition
-  ;; the player to :done. This effectively means that no one is active
-  ;; (since no one is :waiting); set-active-player will need to be
-  ;; called to select another player. We test this by rolling the dice
-  ;; when the player only has the number 1 tile up (since you can't roll
-  ;; a 1 with two dice).
+  ;; the player to :no-moves. The player then needs to end their turn
+  ;; and then set-active-player will need to be called to select another
+  ;; player. We test this by rolling the dice when the player only has
+  ;; the number 1 tile up (since you can't roll a 1 with two dice).
   (let [g (-> (game/new)
               (game/add-player player1-id "One")
               (game/add-player player2-id "Two")
@@ -105,15 +104,15 @@
               (game/set-active-player player1-id)
               (assoc-in [:players player1-id :tiles] (tile-bits #{1}))
               (game/roll-dice player1-id))]
-    ;; The player has a roll, they are done (because they have no
+    ;; The player has a roll, they are no-moves (because they have no
     ;; ability to satisfy the roll), but the game is *not* done
     ;; (roll-dice doesn't decide if the game is done, it just marks the
-    ;; player as done), but also the second player is still not active
-    ;; (that has to be done explicitly). Note that `shut-tiles` *can*
-    ;; mark the game as done since shutting the box is a key part of the
-    ;; game logic, whereas auto-sequencing players (and the game being
-    ;; done if there are no waiting players) is a higher-level construct
-    ;; that the session implements.
+    ;; player as no-moves), but also the second player is still not
+    ;; active (that has to be done explicitly). Note that `shut-tiles`
+    ;; *can* mark the game as done since shutting the box is a key part
+    ;; of the game logic, whereas auto-sequencing players (and the game
+    ;; being done if there are no waiting players) is a higher-level
+    ;; construct that the session implements.
     ;; TODO I wonder if this *should* be part of the game logic? Maybe
     ;; we are conflating "game" and "player" logic in `game` and we
     ;; should instead have a `player` logic namespace that focuses on a
@@ -122,7 +121,7 @@
     ;; `websocket` could then avoid doing that on its own, which I think
     ;; would be better.
     (is (= 2 (-> g :players (get player1-id) :last-roll count)))
-    (is (= :done (-> g :players (get player1-id) :state)))
+    (is (= :no-moves (-> g :players (get player1-id) :state)))
     (is (= :playing (-> g :state)))
     (is (= :waiting (-> g :players (get player2-id) :state))))
 
@@ -157,8 +156,8 @@
     ;; Only tiles not already shut can be shut.
     (is (nil? (game/shut-tiles g player1-id [1 2 4])))
 
-    ;; Both the player and the game transition to :done if the player
-    ;; has shut the box.
+    ;; The player transitions to :shut-box and the game to :done if the
+    ;; player has shut the box.
     (let [g (-> g
                 (update-in [:players player1-id]
                            assoc
@@ -166,8 +165,23 @@
                            :tiles (tile-bits #{2 6}))
                 (game/shut-tiles player1-id [2 6]))]
       (is (= (tile-bits #{}) (-> g :players (get player1-id) :tiles)))
-      (is (= :done (-> g :players (get player1-id) :state)))
+      (is (= :shut-box (-> g :players (get player1-id) :state)))
       (is (= :done (-> g :state))))
 
     ;; Inactive players *cannot* shut tiles.
     (is (nil? (game/shut-tiles g player2-id [8])))))
+
+(deftest end-turn-test
+  (let [g (-> (game/new)
+              (game/add-player player1-id "One")
+              (game/start-round)
+              (game/set-active-player player1-id))]
+    ;; Players can only end-turn from the :no-moves state.
+    (is (= :done (-> g
+                     (assoc-in [:players player1-id :state] :no-moves)
+                     (game/end-turn player1-id)
+                     :players
+                     (get player1-id)
+                     :state)))
+    ;; Players cannot end-turn from any other state.
+    (is (nil? (-> g (game/end-turn player1-id))))))

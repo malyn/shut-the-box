@@ -100,30 +100,38 @@
   (async/go
     (if-let [game (some-> (<! (db/get-game @db/conn game-id))
                           (game-logic/roll-dice player-id))]
-      ;; The outcome of the roll may be that the player is done (because
-      ;; they do not have the tiles to satisfy the roll). If that is the
-      ;; case, their state will be marked as :done. Select a :waiting
-      ;; player and make them the active player. No :waiting players?
-      ;; Then the game is :done.
-      (if (= :done (-> game :players (get player-id) :state))
-        ;; Player is done, let's see if everyone is done.
-        (if-let [new-player-id (->> (:players game)
-                                    (filter-vals #(= :waiting (:state %)))
-                                    keys
-                                    rand-nth)]
-          ;; Selected another player; make this player the active player
-          ;; and broadcast *that* game state.
-          (update-game! game-id (game-logic/set-active-player game new-player-id))
-
-          ;; Could not select another player; mark the game as done and
-          ;; broadcast *that* game state.
-          (update-game! game-id (assoc game :state :done)))
-
-        ;; Player is not done, so go with the original state.
-        (update-game! game-id game))
+      ;; Return the current state, regardless of if the player is done
+      ;; or not. If the player is not done then they will come back with
+      ;; a :shut-tiles command; if they *are* done then they will come
+      ;; back with an :end-turn.
+      (update-game! game-id game)
 
       ;; Couldn't roll the dice, but we don't actually know why (maybe
       ;; the player is not active, maybe they are not in the game,
+      ;; etc.).
+      (ws-send! socket-id [:err]))))
+
+(defn end-turn [socket-id game-id player-id]
+  (async/go
+    (if-let [game (some-> (<! (db/get-game @db/conn game-id))
+                          (game-logic/end-turn player-id))]
+      ;; Player is done, let's see if everyone is done.
+      (if-let [new-player-id (->> (:players game)
+                                  (filter-vals #(= :waiting (:state %)))
+                                  keys
+                                  rand-nth)]
+        ;; Selected another player; make this player the active player
+        ;; and broadcast *that* game state.
+        (update-game! game-id (game-logic/set-active-player game new-player-id))
+
+        ;; Could not select another player; mark the game as done and
+        ;; broadcast *that* game state. This is where the game lands
+        ;; if someone shut's the box, BTW, since the game logic will
+        ;; mark everyone as done as soon as anyone shuts the box.
+        (update-game! game-id (assoc game :state :done)))
+
+      ;; Couldn't roll the dice, but we don't actually know why (maybe
+      ;; the player is not no-moves, maybe they are not in the game,
       ;; etc.).
       (ws-send! socket-id [:err]))))
 
@@ -180,6 +188,8 @@
                    (roll-dice socket-id game-id player-id))
       :shut-tiles (let [[game-id tiles] args]
                     (shut-tiles socket-id game-id player-id tiles))
+      :end-turn (let [[game-id] args]
+                  (end-turn socket-id game-id player-id))
       (do (log/warnf "[%d] Unknown command %s" socket-id op)
           (.send websocket (prn-str [:err]))))))
 

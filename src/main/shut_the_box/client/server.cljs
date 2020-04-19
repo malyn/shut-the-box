@@ -55,3 +55,7 @@
 (defn shut-tiles!
   [game-id tiles]
   (game-client/send! @conn [:shut-tiles game-id tiles]))
+
+(defn end-turn!
+  [game-id]
+  (game-client/send! @conn [:end-turn game-id]))
