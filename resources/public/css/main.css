@@ -109,9 +109,36 @@ button {
  * Game Screen
  */
 
+/* Defaults for iPhone SE */
 :root {
-  --avatar-size: 64px; /* 80px, 96px */
+  --avatar-size: 64px;
   --row-size: calc(0.34 * var(--avatar-size));
+
+  --action-width: calc(0.75 * var(--avatar-size));
+  --action-item-size: calc(0.5 * var(--avatar-size));
+}
+
+@media screen and (orientation: portrait) and (min-height: 500px) {
+  :root {
+    --avatar-size: 80px;
+
+    /* We're actually getting the "too tall/thin" thing here as well;
+     * maybe we need to adjust this based on some ratio of height to
+     * width? */
+    --action-item-size: calc(0.5 * 64px);
+  }
+}
+
+@media screen and (orientation: portrait) and (min-height: 600px) {
+  :root {
+    --avatar-size: 96px;
+
+    /* Note that we never go larger than 80px for the action items,
+     * since they start to get too tall otherwise (such as on iPhone X
+     * screens). */
+    --action-width: calc(0.75 * 80px);
+    --action-item-size: calc(0.5 * 80px);
+  }
 }
 
 .playing {
@@ -301,10 +328,8 @@ button {
 
 .actions {
   display: grid;
-  grid-template-columns: calc(0.75 * var(--avatar-size)) auto calc(0.75 * var(--avatar-size));
+  grid-template-columns: var(--action-width) auto var(--action-width);
   grid-template-rows: min-content;
-
-  --item-size: calc(0.5 * var(--avatar-size));
 }
 
 .actions .start-round, .actions .roll-dice {
@@ -341,8 +366,8 @@ button {
 }
 
 .actions .die1, .actions .die2, .actions .die3, .actions .die4, .actions .die5, .actions .die6 {
-  width: var(--item-size);
-  height: var(--item-size);
+  width: var(--action-item-size);
+  height: var(--action-item-size);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -378,12 +403,12 @@ button {
 .possible-tile .number {
   text-align: center;
   font-weight: 700;
-  font-size: calc(var(--item-size) - 8px);
+  font-size: calc(var(--action-item-size) - 8px);
 }
 
 .actions .ok {
   grid-column: 3/4;
-  font-size: calc(var(--item-size) - 8px);
+  font-size: calc(var(--action-item-size) - 8px);
   font-weight: 700;
   color: #008040;
   border: 4px solid #008040;
