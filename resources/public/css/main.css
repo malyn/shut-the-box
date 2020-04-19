@@ -370,8 +370,6 @@ button {
 .possible-tile.up { color: #008040; }
 .possible-tile.selected { background-color: #008040; }
 
-.possible-tile.down .number { display: none; }
-
 .possible-tile .number {
   text-align: center;
   font-weight: 700;
