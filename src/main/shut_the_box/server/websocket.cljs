@@ -1,11 +1,31 @@
 (ns shut-the-box.server.websocket
   (:require
-    [cljs.core.async :refer [<!] :as async]
+    [cljs.core.async :refer [<! put!] :as async]
     [clojure.edn :as edn]
     [medley.core :refer [filter-vals]]
-    [taoensso.timbre :as log]
     [shut-the-box.common.logic.game :as game-logic]
-    [shut-the-box.server.db :as db]))
+    [shut-the-box.server.config :refer [env]]
+    [shut-the-box.server.db :as db]
+    [taoensso.timbre :as log]
+    [twilio :as Twilio]))
+
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Twilio client
+;;
+
+(defonce twilio-client
+  (Twilio. (:twilio-account-sid @env) (:twilio-auth-token @env)))
+
+(defn twilio-ice-servers!
+  []
+  (let [ch (async/chan)]
+    (-> twilio-client
+        .-tokens
+        .create
+        (.then (fn [token]
+                 (put! ch (.stringify js/JSON (.-iceServers token))))))
+    ch))
+
 
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; WebSocket Client List and ws-send! Function
@@ -52,6 +72,11 @@
 ;; this approach is quickly falling apart and we need to move to more of
 ;; the actor/clock model).
 
+(defn welcome [socket-id player-id]
+  (async/go
+    (let [ice-servers (<! (twilio-ice-servers!))]
+      (ws-send! socket-id [:welcome player-id ice-servers]))))
+
 (defn new-game [socket-id player-id player-name]
   (async/go
     (let [game (-> (game-logic/new)
@@ -85,6 +110,9 @@
       ;; let the whole function fail rather than adding error logic for
       ;; something that shouldn't really be possible.
       (let [starting-player-id (rand-nth (-> game :players keys))
+            ;; TODO This is just to ensure that we can easily test
+            ;; against the PC; remove this before checkin.
+            ;; starting-player-id (first (-> game :players keys))
             game (game-logic/set-active-player game starting-player-id)]
         (update-game! game-id game))
 
@@ -160,7 +188,7 @@
 (defn ws-connected
   [socket-id websocket]
   (swap! sockets assoc socket-id websocket)
-  (.send websocket (prn-str [:welcome socket-id])))
+  (welcome socket-id socket-id))
 
 (defn ws-closed
   [socket-id websocket]
@@ -190,6 +218,8 @@
                     (shut-tiles socket-id game-id player-id tiles))
       :end-turn (let [[game-id] args]
                   (end-turn socket-id game-id player-id))
+      :signal (let [[peer-id json-data] args]
+                (ws-send! peer-id [:signal player-id json-data]))
       (do (log/warnf "[%d] Unknown command %s" socket-id op)
           (.send websocket (prn-str [:err]))))))
 

@@ -11,12 +11,18 @@
   [[msg & data]]
   (case msg
     :welcome
-    (let [[player-id] data]
-      (dispatch [:shut-the-box.client.events/set-player-id player-id]))
+    (let [[player-id ice-servers] data]
+      (dispatch [:shut-the-box.client.events/set-player-id player-id])
+      (dispatch [:shut-the-box.client.events/set-ice-servers ice-servers]))
 
     :game
     (let [[game-id game] data]
       (dispatch [:shut-the-box.client.events/update-game game-id game]))
+
+    :signal
+    (let [[peer-id json-data] data]
+      #_(log/info "RTC signaling from" peer-id ":" json-data)
+      (dispatch [:shut-the-box.client.events/signal peer-id json-data]))
 
     :err
     (log/error "Error:" data)
@@ -59,3 +65,7 @@
 (defn end-turn!
   [game-id]
   (game-client/send! @conn [:end-turn game-id]))
+
+(defn signal-peer!
+  [peer-id json-data]
+  (game-client/send! @conn [:signal peer-id json-data]))

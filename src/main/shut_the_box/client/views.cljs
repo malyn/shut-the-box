@@ -88,12 +88,14 @@
    [:h1 "Joining..."]])
 
 (defn player-icon
-  []
-  #_[:div.video
-     {:id (str "video-" id)
-      :style {:width "120px"
-              :height "120px"}}]
-  [:div.avatar])
+  [player-id video?]
+  [:div.avatar
+   [:video
+    {:id (str "video-" player-id)
+     :style {:display (if (true? video?) "block" "none")}
+     ;; For some reason we need this for iOS (Safari) to actually play
+     ;; the video; otherwise it just shows a static frame.
+     :playsInline true}]])
 
 (defn die
   [index x]
@@ -155,11 +157,11 @@
      tiles)])
 
 (defn player-tile
-  [player-index [player-id {:keys [state name tiles last-roll]}]]
+  [player-index [player-id {:keys [state name tiles last-roll video?]}]]
   (with-meta
     [:div.player
      {:class (str "avatar" player-index)}
-     [player-icon]
+     [player-icon player-id video?]
      [:div.player-name
       name]
      [tile-set tiles]
@@ -178,7 +180,10 @@
                   [:div.state-value (dice last-roll)]]
        :done [:div.state
               [:div.state-title "Score"]
-              [:div.state-value (tile-logic/score tiles)]])]
+              [:div.state-value (tile-logic/score tiles)]]
+       :shut-box [:div.state
+                  [:div.state-title "SHUT BOX!!!"]
+                  [:div.state-value "0"]])]
     {:key (str "player-tile-" player-index)}))
 
 (defn game-waiting-actions
@@ -266,7 +271,10 @@
   [game-id game player selected-tiles]
   [:div.playing
    [:div.title
-    [:div (str "Game #" game-id)]]
+    [:div (str "Game #" game-id)]
+    [:div.video-toggle
+     {:on-click #(dispatch [::events/enable-video])}
+     [:i.fas.fa-video]]]
    [:div.players
     (map-indexed player-tile (:players game))]
    (cond

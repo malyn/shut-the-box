@@ -2,11 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [re-frame.core :refer [reg-event-db reg-event-fx] :as re-frame]
-    [taoensso.timbre :as log]
-    [shut-the-box.client.agora-rtc :as agora]
     [shut-the-box.client.db :as db]
-    [shut-the-box.client.rtc :as rtc]
-    [shut-the-box.client.server :as server]))
+    [shut-the-box.client.server :as server]
+    [simple-peer :as Peer]
+    [taoensso.timbre :as log]))
 
 
 ;; -- Interceptors ------------------------------------------------------------
@@ -40,28 +39,116 @@
     (assoc db :player-id player-id)))
 
 (reg-event-db
-  ::update-game
-  (fn [db [_ game-id game]]
-    (assoc db
-           :state :joined
-           :game-id game-id
-           :game game)))
+  ::set-ice-servers
+  (fn [db [_ ice-servers]]
+    (assoc db :ice-servers ice-servers)))
+
+(defn add-peer!
+  [initiator? peer-id ice-servers]
+  (doto (Peer. #js {:initiator initiator?
+                    :config #js {:iceServers (.parse js/JSON ice-servers)}})
+        (.on "signal"
+             (fn [data]
+               (let [json (.stringify js/JSON data)]
+                 #_(log/info "Signaling data for peer" peer-id ":" json)
+                 (server/signal-peer! peer-id json))))
+        (.on "connect"
+             (fn []
+               (log/info "Connected to peer" peer-id)))
+        (.on "data"
+             (fn [data]
+               (log/info "Message from peer" peer-id ":" data)))
+        (.on "stream"
+             (fn [stream]
+               (log/info "Got stream from peer" peer-id)
+               (let [video (.querySelector js/document (str "#video-" peer-id))]
+                 (set! (.-srcObject video) stream)
+                 (.play video))
+               (re-frame/dispatch [::add-remote-stream peer-id stream])))
+        (.on "error"
+             (fn [err]
+               (log/error "RTC error:" err)))))
+
+(reg-event-fx
+  ::signal
+  (fn [{:keys [db]} [_ peer-id json-data]]
+    (let [peer (-> db :peers (get peer-id))]
+      (.signal peer (.parse js/JSON json-data)))
+
+    ;; No effects.
+    nil))
 
 (reg-event-db
-  ::join-channel
-  (fn [db [_ {:keys [channel uid on-success on-failure]}]]
-    (agora/join-channel!
-      @rtc/client
-      channel
-      uid
-      (fn [channel uid]
-        (re-frame/dispatch [on-success channel uid]))
-      (fn [channel err]
-        (re-frame/dispatch [on-failure channel err])))
-    (assoc db
-           :state :joining
-           :channel channel
-           :peers #{})))
+  ::add-local-stream
+  (fn [{:keys [player-id peers] :as db} [_ stream]]
+    ;; Make this *our* avatar (but don't play audio, since that would
+    ;; just produce a local echo).
+    (let [video (.querySelector js/document (str "#video-" player-id))]
+      (set! (.-muted video) true)
+      (set! (.-srcObject video) stream)
+      (.play video))
+
+    ;; Send this stream to our existing peers.
+    (doseq [[peer-id peer] peers]
+      (log/info "Sending local stream to peer" peer-id)
+      (.addStream peer stream))
+
+    ;; Persist the local stream so that we can send it to any new
+    ;; players that join.
+    (-> db
+        (assoc :local-stream stream)
+        (assoc-in [:game :players player-id :video?] true))))
+
+(reg-event-fx
+  ::enable-video
+  (fn [_ [_]]
+    (-> js/navigator
+        .-mediaDevices
+        (.getUserMedia #js {:video #js {:width 96
+                                        :height 96
+                                        :facingMode "user"}
+                            :audio true})
+        (.then (fn [stream]
+                 (re-frame/dispatch [::add-local-stream stream])))
+        (.catch (fn []
+                  (log/error "Unable to initialize camera."))))
+    ;; No additional effects.
+    nil))
+
+(reg-event-db
+  ::add-remote-stream
+  (fn [db [_ peer-id]]
+    ;; Set the `video?` flag on this player.
+    (assoc-in db [:game :players peer-id :video?] true)))
+
+(reg-event-db
+  ::update-game
+  (fn [{:keys [player-id ice-servers] :as db} [_ game-id game]]
+    ;; Update the database.
+    (let [db (assoc db
+                    :state :joined
+                    :game-id game-id
+                    :game game)
+          new-peers (clojure.set/difference
+                      (-> db :game :players (dissoc player-id) keys set)
+                      (-> db :peers keys set))]
+      ;; Do we have a new peer? If so, figure out if we are the
+      ;; initiator the receiver (the initiator is whichever one of us
+      ;; has the smaller player-id) and construct the Peer object;
+      ;; events on the Peer object will then drive the signaling process
+      ;; through the server.
+      (log/info "New Peers:" new-peers)
+      (if (seq new-peers)
+        ;; New peers; create and store Peer objects for each one.
+        (update db :peers merge
+                (into (hash-map)
+                      (map (fn [peer-id]
+                             [peer-id
+                              (add-peer! (< player-id peer-id) peer-id ice-servers)])
+                           new-peers)))
+
+        ;; No new peers; return (already-updated-earlier) db as-is.
+        db))))
 
 (reg-event-db
   ::new-game
@@ -148,87 +235,3 @@
   (fn [{:keys [db]} [_]]
     ;; TODO This should probably be a `reg-fx` event? ::game-io/new-game?
     (server/end-turn! (:game-id db))))
-
-(reg-event-fx
-  ::publish-video
-  (fn [{:keys [db]} [_ {:keys [on-success on-failure]}]]
-    (agora/create-stream!
-      @rtc/client
-      "video-me"
-      (:uid db)
-      true
-      true
-      (fn []
-        (re-frame/dispatch [on-success]))
-      (fn []
-        (re-frame/dispatch [on-failure])))))
-
-(reg-event-fx
-  ::subscribe-stream
-  (fn [_ [_ {:keys [uid stream on-failure]}]]
-    (agora/subscribe-stream!
-      @rtc/client
-      stream
-      (fn []
-        (re-frame/dispatch [on-failure uid])))))
-
-(reg-event-fx
-  ::join-succeeded
-  (fn [{:keys [db]} [_ channel uid]]
-    (log/info "Join succeeded for channel" channel "; uid=" uid)
-    {:db (assoc db
-                :state :joined
-                :channel channel
-                :uid uid
-                :peers #{})
-     :dispatch [::publish-video {:on-success ::publish-succeeded
-                                 :on-failure ::publish-failed}]}))
-
-(reg-event-db
-  ::publish-succeeded
-  (fn [db [_]]
-    db))
-
-(reg-event-db
-  ::publish-failed
-  (fn [db [_]]
-    db))
-
-(reg-event-db
-  ::join-failed
-  (fn [db [_ channel err]]
-    (log/error "Join failed for channel" channel "; err=" err)
-    (assoc db
-           :state :unjoin
-           :peers #{})))
-
-(reg-event-db
-  ::peer-joined
-  (fn [{:keys [peers] :as db} [_ uid]]
-    (assoc db
-           :peers (conj peers uid))))
-
-(reg-event-db
-  ::peer-left
-  (fn [{:keys [peers] :as db} [_ uid]]
-    (assoc db
-           :peers (disj peers uid))))
-
-(reg-event-fx
-  ::stream-added
-  (fn [{:keys [db]} [_ uid stream]]
-    (log/info "Stream added for uid" uid)
-    (when (not= (:uid db) uid)
-      {:dispatch [::subscribe-stream {:uid uid
-                                      :stream stream
-                                      :on-failure ::subscribe-failed}]})))
-
-(reg-event-fx
-  ::stream-subscribed
-  (fn [{:keys [db]} [_ uid stream]]
-    (log/info "Stream subscribed for uid" uid)
-    (agora/play-stream!
-      stream
-      (str "video-" uid))
-    ;; TODO Mark the player's stream as playing.
-    {:db db}))
