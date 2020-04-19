@@ -146,17 +146,37 @@ button {
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: calc(0.5 * var(--avatar-size)) min-content auto;
+  grid-row-gap: 8px;
 }
 
-.playing .title {
-  display: flex;
-  margin-bottom: 8px;
-  justify-content: center;
-  align-items: center;
+.playing .nav {
   background-color: #72766f;
   color: #414040;
-  font-size: 2rem;
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+}
+
+.left-nav, .center-nav, .right-nav {
+  display: flex;
+  align-items: center;
+}
+.center-nav { justify-content: center; }
+.right-nav { justify-content: flex-end; }
+
+.nav .title {
+  font-size: 1.25rem;
   font-weight: 700;
+}
+
+.right-nav button {
+  border: none;
+  outline: none;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+  background-color: inherit;
+  color: inherit;
 }
 
 .playing .players {
@@ -165,10 +185,6 @@ button {
   grid-template-columns: 100%;
   grid-template-rows: var(--avatar-size);
   grid-row-gap: 8px;
-}
-
-.playing .actions {
-  margin-top: 8px;
 }
 
 .playing .player {

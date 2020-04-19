@@ -270,13 +270,18 @@
 (defn playing-view
   [game-id game player selected-tiles]
   [:div.playing
-   [:div.title
-    [:div (str "Game #" game-id)]
-    [:div.video-toggle
-     {:on-click #(dispatch [::events/enable-video])}
-     [:i.fas.fa-video]]]
+   [:div.nav
+    [:div.left-nav]
+    [:div.center-nav
+     [:span.title (str "Game #" game-id)]]
+    [:div.right-nav
+     [:button.video-toggle
+      {:on-click #(dispatch [::events/enable-video])}
+      [:i.fas.fa-video]]]]
+
    [:div.players
     (map-indexed player-tile (:players game))]
+
    (cond
      (= :waiting (:state game)) (game-waiting-actions)
      (= :done (:state game)) (game-done-actions)
