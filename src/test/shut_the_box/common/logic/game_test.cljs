@@ -44,7 +44,34 @@
   ;; a round to start.
   (is (nil? (-> (game/new)
                 ;; Notice that there is no add-player
-                (game/start-round)))))
+                (game/start-round))))
+
+  ;; The (next) round can be started after the previous round has
+  ;; finished (is :done). This also resets every player's state and
+  ;; tiles.
+  (let [g (-> (game/new)
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two")
+              (game/start-round)
+              (update-in [:players player1-id]
+                         assoc
+                         :state :done
+                         :last-roll [2 6]
+                         :tiles (tile-bits #{2 3 4}))
+              (update-in [:players player2-id]
+                         assoc
+                         :state :done
+                         :last-roll [3 4]
+                         :tiles (tile-bits #{2 3}))
+              (assoc :state :done)
+              (game/start-round))]
+    (is (= :playing (-> g :state)))
+    (is (= :waiting (-> g :players (get player1-id) :state)))
+    (is (= "One" (-> g :players (get player1-id) :name)))
+    (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player1-id) :tiles)))
+    (is (= :waiting (-> g :players (get player2-id) :state)))
+    (is (= "Two" (-> g :players (get player2-id) :name)))
+    (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player2-id) :tiles)))))
 
 (deftest set-active-player-test
   ;; Any player can be made the active player at any time after the

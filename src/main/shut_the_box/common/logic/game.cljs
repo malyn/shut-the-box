@@ -33,9 +33,27 @@
 
 (defn start-round
   [game]
-  (when (and (= (:state game) :waiting)
-             (not (zero? (count (:players game)))))
-    (assoc game :state :playing)))
+  (cond
+    ;; Game has never been started.
+    (and (= (:state game) :waiting)
+         (not (zero? (count (:players game)))))
+    (assoc game :state :playing)
+
+    ;; All players are done and next round is being started.
+    (and (= (:state game) :done)
+         (not (zero? (count (:players game))))
+         (every? #(= :done (:state %)) (-> game :players vals)))
+    (-> game
+        (assoc :state :playing)
+        (update-in [:players] (fn [players]
+                                (map-vals #(assoc %
+                                                  :state :waiting
+                                                  :tiles (tile/reset))
+                                          players))))
+
+    ;; Round is already started; reject the (re)start attempt.
+    :else
+    nil))
 
 (defn set-active-player
   [game player-id]
