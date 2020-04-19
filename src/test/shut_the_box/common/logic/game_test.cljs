@@ -71,7 +71,30 @@
     (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player1-id) :tiles)))
     (is (= :waiting (-> g :players (get player2-id) :state)))
     (is (= "Two" (-> g :players (get player2-id) :name)))
-    (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player2-id) :tiles)))))
+    (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player2-id) :tiles))))
+
+  ;; You can start another round after one player has shut the box.
+  (let [g (-> (game/new)
+              (game/add-player player1-id "One")
+              (game/add-player player2-id "Two")
+              (game/start-round)
+              (update-in [:players player1-id]
+                         assoc
+                         :state :thinking
+                         :last-roll [4 4]
+                         :tiles (tile-bits #{2 6}))
+              (game/shut-tiles player1-id [2 6]))]
+    (is (= :done (-> g :state)))
+    (is (= :shut-box (-> g :players (get player1-id) :state)))
+    (is (= :waiting (-> g :players (get player2-id) :state)))
+    (let [g (game/start-round g)]
+      (is (= :playing (-> g :state)))
+      (is (= :waiting (-> g :players (get player1-id) :state)))
+      (is (= "One" (-> g :players (get player1-id) :name)))
+      (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player1-id) :tiles)))
+      (is (= :waiting (-> g :players (get player2-id) :state)))
+      (is (= "Two" (-> g :players (get player2-id) :name)))
+      (is (= (tile-bits #{1 2 3 4 5 6 7 8 9 10}) (-> g :players (get player2-id) :tiles))))))
 
 (deftest set-active-player-test
   ;; Any player can be made the active player at any time after the

@@ -39,10 +39,11 @@
          (not (zero? (count (:players game)))))
     (assoc game :state :playing)
 
-    ;; All players are done and next round is being started.
+    ;; All players are done *or* one player shut the box.
     (and (= (:state game) :done)
          (not (zero? (count (:players game))))
-         (every? #(= :done (:state %)) (-> game :players vals)))
+         (or (every? #(= :done (:state %)) (-> game :players vals))
+             (some #(= :shut-box (:state %)) (-> game :players vals))))
     (-> game
         (assoc :state :playing)
         (update-in [:players] (fn [players]
