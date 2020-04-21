@@ -14,7 +14,7 @@
         websocket (WebSocket. true)]
     (async/go-loop []
       (let [websocket (WebSocket. true)
-            url (str "wss://devbox.example.com:3000/")]
+            url (str "wss://" (-> js/document .-location .-host))]
         (doto websocket
               (.addEventListener
                 WebSocket.EventType.OPENED
