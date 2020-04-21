@@ -97,7 +97,7 @@
     ;; players that join.
     (-> db
         (assoc :local-stream stream)
-        (assoc-in [:game :players player-id :video?] true))))
+        (update :video-players conj player-id))))
 
 (reg-event-fx
   ::enable-video
@@ -118,8 +118,7 @@
 (reg-event-db
   ::add-remote-stream
   (fn [db [_ peer-id]]
-    ;; Set the `video?` flag on this player.
-    (assoc-in db [:game :players peer-id :video?] true)))
+    (update db :video-players conj peer-id)))
 
 (reg-event-db
   ::update-game

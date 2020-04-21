@@ -268,7 +268,7 @@
   [:div.actions])
 
 (defn playing-view
-  [game-id game player selected-tiles]
+  [game-id game player selected-tiles video-players]
   [:div.playing
    [:div.nav
     [:div.left-nav]
@@ -280,7 +280,13 @@
       [:i.fas.fa-video]]]]
 
    [:div.players
-    (map-indexed player-tile (:players game))]
+    (map-indexed (fn [player-index [player-id player]]
+                   (player-tile
+                     player-index
+                     [player-id (assoc player
+                                       :video?
+                                       (contains? video-players player-id))]))
+                 (:players game))]
 
    (cond
      (= :waiting (:state game)) (game-waiting-actions)
@@ -300,4 +306,5 @@
       :joined (playing-view @(subscribe [::subs/game-id])
                             @(subscribe [::subs/game])
                             @(subscribe [::subs/player])
-                            @(subscribe [::subs/selected-tiles])))))
+                            @(subscribe [::subs/selected-tiles])
+                            @(subscribe [::subs/video-players])))))

@@ -44,6 +44,11 @@
   (fn [{:keys [selected-tiles]}]
     selected-tiles))
 
+(reg-sub
+  ::video-players
+  (fn [{:keys [video-players]}]
+    video-players))
+
 
 ;; =====================================================================
 ;; LAYER 3 Subscriptions
