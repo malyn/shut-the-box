@@ -54,7 +54,8 @@
                  (server/signal-peer! peer-id json))))
         (.on "connect"
              (fn []
-               (log/info "Connected to peer" peer-id)))
+               (log/info "Connected to peer" peer-id)
+               (re-frame/dispatch [::peer-connected peer-id])))
         (.on "data"
              (fn [data]
                (log/info "Message from peer" peer-id ":" data)))
@@ -74,6 +75,18 @@
   (fn [{:keys [db]} [_ peer-id json-data]]
     (let [peer (-> db :peers (get peer-id))]
       (.signal peer (.parse js/JSON json-data)))
+
+    ;; No effects.
+    nil))
+
+(reg-event-fx
+  ::peer-connected
+  (fn [{:keys [db]} [_ peer-id]]
+    ;; Have *we* started streaming video? If so, this peer would have
+    ;; missed the initial stream, so give it to them now.
+    (when-let [{:keys [local-stream]} db]
+      (log/info "Sending local stream to *new* peer" peer-id)
+      (.addStream (-> db :peers (get peer-id)) local-stream))
 
     ;; No effects.
     nil))
