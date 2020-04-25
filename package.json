@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "stylelint": "stylelint resources\\public\\main.css",
+    "stylelint": "stylelint resources\\public\\css\\main.css",
     "tidy": "tidy -quiet -errors resources\\public\\index.html"
   },
   "dependencies": {
