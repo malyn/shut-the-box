@@ -1,0 +1,65 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build App and Deploy to Azure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Cache Node.js Dependencies
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+      - name: Install Node.js Dependencies
+        run: npm install --ignore-scripts
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12'
+      - name: Cache Clojure Dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('deps.edn') }}
+      - name: Install Clojure
+        run: |
+          curl -O https://download.clojure.org/install/linux-install-1.10.1.536.sh
+          chmod +x linux-install-1.10.1.536.sh
+          sudo ./linux-install-1.10.1.536.sh
+      - name: Build App
+        run: clojure -A:release
+
+      - name: Assemble Prod Distribution
+        run: npx gulp
+      - name: Cache Prod Node.js Dependencies
+        uses: actions/cache@v1
+        with:
+          path: target/dist/node_modules
+          key: ${{ runner.os }}-npm-prod-${{ hashFiles('package-lock.json') }}
+      - name: Install Prod Node.js Dependencies
+        run: |
+          cd target/dist
+          npm install --production --ignore-scripts
+      - name: Package Prod App
+        run: |
+          cd target/dist
+          zip -r ../dist.zip .
+      - name: Deploy Prod App to Azure
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: bitsofmeta
+          package: target/dist.zip
+          publish-profile: ${{ secrets.azureWebAppPublishProfile }}

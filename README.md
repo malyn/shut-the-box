@@ -1,3 +1,34 @@
+# Azure
+
+Add an environment variable:
+
+```
+az webapp config appsettings set --resource-group ShutTheBox --name shutthebox --settings TWILIO_ACCOUNT_SID="..."
+```
+
+Manually deploy using the [run directly from package](https://docs.microsoft.com/en-us/azure/app-service/deploy-run-package) flow:
+
+```
+clojure -A:release
+npx gulp
+
+cd target\dist
+npm install --production --ignore-scripts
+7z a -r ..\dist.zip .
+cd ..\..
+
+az webapp deployment source config-zip --resource-group ShutTheBox --name shutthebox --src target\dist.zip
+```
+
+Tail logs:
+
+```
+az webapp log tail --resource-group ShutTheBox --name shutthebox
+```
+
+Using [this approach](https://docs.microsoft.com/en-us/azure/app-service/deploy-github-actions) for deploying from GitHub.
+
+
 # Convert Let's Encrypt Keys to JKS
 
 From [here](https://maximilian-boehm.com/en-gb/blog/create-a-java-keystore-jks-from-lets-encrypt-certificates-1884000/):
