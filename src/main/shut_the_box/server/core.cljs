@@ -1,6 +1,7 @@
 (ns shut-the-box.server.core
   (:require
     [macchiato.middleware.node-middleware :refer [wrap-node-middleware]]
+    [macchiato.middleware.proxy-headers :refer [wrap-forwarded-remote-addr]]
     [macchiato.middleware.ssl :refer [wrap-forwarded-scheme wrap-ssl-redirect]]
     [macchiato.server :as http]
     [macchiato.util.response :as response]
@@ -37,6 +38,7 @@
     (if (:dev @env)
       {:middleware [wrap-connection-close]}
       {:middleware [wrap-forwarded-scheme
+                    wrap-forwarded-remote-addr
                     wrap-ssl-redirect]})))
 
 (defstate ^{:on-reload :noop} server
@@ -48,7 +50,8 @@
                   :private-key "dev-privkey.pem"
                   :certificate "dev-fullchain.pem"
                   :on-success  #(log/info "ShutTheBox started on" (:host @env) ":" (:port @env))})
-               (http/start-ws #(websocket/handler %)))
+               (http/start-ws (wrap-forwarded-remote-addr
+                                websocket/handler)))
   :stop (.close @server))
 
 (defn -main [& args]
