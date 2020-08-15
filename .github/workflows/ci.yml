@@ -56,9 +56,9 @@ jobs:
       - name: Package Prod App
         run: |
           cd target/dist
-          zip -q -r ../dist.zip .
+          tar cfz ../dist.tgz .
       - name: Upload Prod App Artifact
         uses: actions/upload-artifact@v2
         with:
           name: dist
-          path: target/dist.zip
+          path: target/dist.tgz
