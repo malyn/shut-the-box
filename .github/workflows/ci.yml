@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build App
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
-    name: Build App and Deploy to Azure
+  build:
+    name: Build App
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -53,13 +53,8 @@ jobs:
         run: |
           cd target/dist
           npm install --production --ignore-scripts
-      - name: Package Prod App
-        run: |
-          cd target/dist
-          zip -r ../dist.zip .
-      - name: Deploy Prod App to Azure
-        uses: azure/webapps-deploy@v2
+      - name: Upload Prod App Artifact
+        uses: actions/upload-artifact@v2
         with:
-          app-name: bitsofmeta
-          package: target/dist.zip
-          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
+          name: dist
+          path: target/dist/
