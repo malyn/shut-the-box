@@ -1,8 +1,6 @@
 /.cpcache
 /.shadow-cljs
+/certs
 /node_modules
 /target
-*.jks
-*.pkcs12
-*.pem
 config.edn

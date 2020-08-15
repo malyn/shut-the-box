@@ -3,7 +3,7 @@
  ;; browsers will complain if an HTTPS page (which is required in order
  ;; to access the microphone and camera) makes a connection to a non-SSL
  ;; WebSocket address.
- :ssl {:keystore "keystore.jks"
+ :ssl {:keystore "certs/dev-keystore.jks"
        :password "password"}
  :builds {:client {:target :browser
                    :asset-path "/js"

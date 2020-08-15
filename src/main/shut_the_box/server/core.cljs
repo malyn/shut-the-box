@@ -44,11 +44,11 @@
 (defstate ^{:on-reload :noop} server
   :start (doto (http/start
                  {:handler     (handler)
-                  :protocol    (if (:dev @env) :https :http)
                   :host        (:host @env)
                   :port        (:port @env)
-                  :private-key "dev-privkey.pem"
-                  :certificate "dev-fullchain.pem"
+                  :protocol    (if (:dev @env) :https :http)
+                  :private-key "certs/dev-privkey.pem"
+                  :certificate "certs/dev-fullchain.pem"
                   :on-success  #(log/info "ShutTheBox started on" (:host @env) ":" (:port @env))})
                (http/start-ws (wrap-forwarded-remote-addr
                                 websocket/handler)))
