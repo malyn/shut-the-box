@@ -8,10 +8,10 @@
     [macchiato.util.response :as response]
     [mount.core :as mount :refer [defstate]]
     [reitit.ring :as ring]
-    ["serve-static" :as serve-static]
-    [taoensso.timbre :as log]
+    [serve-static]
     [shut-the-box.server.config :refer [env]]
-    [shut-the-box.server.websocket :as websocket]))
+    [shut-the-box.server.websocket :as websocket]
+    [taoensso.timbre :as log]))
 
 (defn ->abspath
   "Returns the given service-relative path as an absolute path, enabling
@@ -32,9 +32,9 @@
              raise)))
 
 (defn handler
-  []
+  [routes]
   (ring/ring-handler
-    (ring/router [])
+    (ring/router [routes])
     (-> (ring/create-default-handler)
         (wrap-node-middleware (serve-static
                                 (->abspath
@@ -58,7 +58,7 @@
 
 (defstate ^{:on-reload :noop} server
   :start (doto (http/start
-                 {:handler     (handler)
+                 {:handler     (handler [])
                   :protocol    (:protocol @env)
                   :host        (:host @env)
                   :port        (:port @env)
