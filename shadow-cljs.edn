@@ -27,7 +27,7 @@
                    ;; name doesn't match what is in the SSL certificate.
                    :devtools {:autoload true
                               :devtools-url "https://devbox.example.com:9630"}
-                   :dev {:output-to "target/dev/server.js"}
+                   :dev {:output-to "server.js"}
                    :release {:output-to "target/release/server.js"}}
           :test {:target :node-test
                  :output-to "target/test/node-test.js"
