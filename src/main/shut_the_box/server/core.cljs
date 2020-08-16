@@ -62,12 +62,14 @@
                   :protocol    (:protocol @env)
                   :host        (:host @env)
                   :port        (:port @env)
+                  :ipc-path    (->abspath (:ipc-path @env))
                   :private-key (->abspath (:private-key @env))
                   :certificate (->abspath (:certificate @env))
                   :on-success  #(log/info "ShutTheBox started on"
                                           (case (:protocol @env)
                                             :http (str "http://" (:host @env) ":" (:port @env))
-                                            :https (str "https://" (:host @env) ":" (:port @env))))})
+                                            :https (str "https://" (:host @env) ":" (:port @env))
+                                            :ipc (:ipc-path @env)))})
                (http/start-ws (wrap-forwarded-remote-addr
                                 websocket/handler)))
   :stop (.close @server))
