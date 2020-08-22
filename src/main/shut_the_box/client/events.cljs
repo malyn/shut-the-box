@@ -84,7 +84,7 @@
   (fn [{:keys [db]} [_ peer-id]]
     ;; Have *we* started streaming video? If so, this peer would have
     ;; missed the initial stream, so give it to them now.
-    (when-let [{:keys [local-stream]} db]
+    (when-let [local-stream (get db :local-stream)]
       (log/info "Sending local stream to *new* peer" peer-id)
       (.addStream (-> db :peers (get peer-id)) local-stream))
 
