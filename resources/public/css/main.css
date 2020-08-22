@@ -212,18 +212,18 @@ button {
   border-radius: 4px;
 }
 
-.avatar0  .avatar { background-image: url(/img/avatars/bear.png); }
-.avatar1  .avatar { background-image: url(/img/avatars/chick.png); }
-.avatar2  .avatar { background-image: url(/img/avatars/cow.png); }
-.avatar3  .avatar { background-image: url(/img/avatars/dog.png); }
-.avatar4  .avatar { background-image: url(/img/avatars/elephant.png); }
-.avatar5  .avatar { background-image: url(/img/avatars/hippo.png); }
-.avatar6  .avatar { background-image: url(/img/avatars/horse.png); }
-.avatar7  .avatar { background-image: url(/img/avatars/narwhal.png); }
-.avatar8  .avatar { background-image: url(/img/avatars/parrot.png); }
-.avatar9  .avatar { background-image: url(/img/avatars/penguin.png); }
-.avatar10 .avatar { background-image: url(/img/avatars/pig.png); }
-.avatar11 .avatar { background-image: url(/img/avatars/rhino.png); }
+.avatar0  .avatar { background-image: url(../img/avatars/bear.png); }
+.avatar1  .avatar { background-image: url(../img/avatars/chick.png); }
+.avatar2  .avatar { background-image: url(../img/avatars/cow.png); }
+.avatar3  .avatar { background-image: url(../img/avatars/dog.png); }
+.avatar4  .avatar { background-image: url(../img/avatars/elephant.png); }
+.avatar5  .avatar { background-image: url(../img/avatars/hippo.png); }
+.avatar6  .avatar { background-image: url(../img/avatars/horse.png); }
+.avatar7  .avatar { background-image: url(../img/avatars/narwhal.png); }
+.avatar8  .avatar { background-image: url(../img/avatars/parrot.png); }
+.avatar9  .avatar { background-image: url(../img/avatars/penguin.png); }
+.avatar10 .avatar { background-image: url(../img/avatars/pig.png); }
+.avatar11 .avatar { background-image: url(../img/avatars/rhino.png); }
 
 .playing .player .player-name {
   grid-row: 1/2;
@@ -352,12 +352,12 @@ button {
   height: calc(var(--row-size) - 6px);
 }
 
-.die1 { background-image: url(/img/dice/dieWhite1.png); }
-.die2 { background-image: url(/img/dice/dieWhite2.png); }
-.die3 { background-image: url(/img/dice/dieWhite3.png); }
-.die4 { background-image: url(/img/dice/dieWhite4.png); }
-.die5 { background-image: url(/img/dice/dieWhite5.png); }
-.die6 { background-image: url(/img/dice/dieWhite6.png); }
+.die1 { background-image: url(../img/dice/dieWhite1.png); }
+.die2 { background-image: url(../img/dice/dieWhite2.png); }
+.die3 { background-image: url(../img/dice/dieWhite3.png); }
+.die4 { background-image: url(../img/dice/dieWhite4.png); }
+.die5 { background-image: url(../img/dice/dieWhite5.png); }
+.die6 { background-image: url(../img/dice/dieWhite6.png); }
 
 .actions {
   display: grid;
