@@ -3,9 +3,8 @@
     [cljs.core.async :as async]
     [mount.core :as mount :refer [defstate]]
     [re-frame.core :refer [dispatch]]
-    [taoensso.timbre :as log]
     [shut-the-box.client.game-client :as game-client]
-    #_[shut_the_box.client.config :refer [env]]))
+    [taoensso.timbre :as log]))
 
 (defn game-client-message
   [[msg & data]]
@@ -37,7 +36,8 @@
       (recur))))
 
 (defstate ^{:on-reload :noop} conn
-  :start (let [conn (game-client/connect!)]
+  :start (let [conn (game-client/connect!
+                      (str "wss://" (-> js/document .-location .-host)))]
            (println "Connected to game server.")
            (game-client-loop conn)
            conn))

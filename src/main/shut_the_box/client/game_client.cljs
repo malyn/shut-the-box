@@ -7,14 +7,13 @@
     [goog.net WebSocket]))
 
 (defn connect!
-  []
+  [url]
   (let [conn (atom {:recv-ch (async/chan)
                     :send-ch (async/chan)
                     :websocket nil})
         websocket (WebSocket. true)]
     (async/go-loop []
-      (let [websocket (WebSocket. true)
-            url (str "wss://" (-> js/document .-location .-host))]
+      (let [websocket (WebSocket. true)]
         (doto websocket
               (.addEventListener
                 WebSocket.EventType.OPENED
